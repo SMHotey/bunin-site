@@ -1,18 +1,19 @@
 import { writeFile, readFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { wikitext, api } from './wiki.mjs';
+import { api } from './wiki.mjs';
+import { cleanWiki, templateField } from './clean.mjs';
+
+// Импорт произведений И. А. Бунина с Викитеки.
+// Страница автора: «Поэзия» → подсекции «Стихи ГГ—ГГ» (стихи inline, {{poemx}});
+// «Проза» → список «Рассказы:». Часть прозы лежит текстом на странице,
+// часть — только заголовком {{ПСС И. А. Бунина (1915)}} с djvu-сканом:
+// для неё берём рендер подстраницы «/ПСС 1915 (ВТ)» (современная орфография).
 
 const AUTHOR = 'Автор:Иван Алексеевич Бунин';
+const WIKI = 'https://ru.wikisource.org/wiki/';
 const CACHE = 'data/raw-cache.json';
-
-const GENRES = {
-  'Малые поэмы': 'Малая поэма',
-  'Поэмы': 'Поэма',
-  'Художественная проза': 'Проза',
-  'Письма': 'Письмо',
-  'Автобиографии': 'Автобиография',
-  'Статьи, заметки, ответы на вопросы анкет': 'Статья',
-};
+const RENDERCACHE = 'data/render-cache.json';
+const ENTRIES = 'data/entries.json';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -30,61 +31,54 @@ function sectionMap(text) {
   return out;
 }
 
-function linksFromLine(line) {
-  const items = [];
-  let m;
-  const re2 = /\{\{2О\|([^|}]+)\|([^|}]+)\}\}/g;
-  while ((m = re2.exec(line))) items.push({ target: m[1].trim(), label: m[2].trim() });
-  const re = /\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]*))?\]\]/g;
-  while ((m = re.exec(line))) {
-    const target = m[1].trim();
-    if (/^(Категория|Файл|Image|Изображение):/i.test(target)) continue;
-    items.push({ target, label: (m[2] || target).replace(/'''?/g, '').trim() });
-  }
-  return items;
-}
-
-function cleanWiki(raw) {
-  let t = raw;
-  t = t.replace(/<!--[\s\S]*?-->/g, '');
-  t = t.replace(/<ref[^>]*\/>/g, '');
-  t = t.replace(/<ref[^>]*>[\s\S]*?<\/ref>/g, '');
-  let prev;
-  do { prev = t; t = t.replace(/\{\{[^{}]*\}\}/g, ''); } while (t !== prev);
-  t = t.replace(/\[\[(?:Категория|Файл|Image|Изображение):[^\]]*\]\]/gi, '');
-  t = t.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2');
-  t = t.replace(/\[\[([^\]]+)\]\]/g, '$1');
-  t = t.replace(/\[https?:\/\/[^\s\]]+\s+([^\]]+)\]/g, '$1');
-  t = t.replace(/\[https?:\/\/[^\]]+\]/g, '');
-  t = t.replace(/'''?/g, '');
-  t = t.replace(/<\/?poem[^>]*>/gi, '');
-  t = t.replace(/<br\s*\/?>/gi, '\n');
-  t = t.replace(/<\/?(?:center|div|span|small|big|p|i|b|u|sup|sub|blockquote)[^>]*>/gi, '\n');
-  t = t.replace(/^__[A-Z]+__$/gm, '');
-  t = t.replace(/&nbsp;/g, ' ').replace(/&mdash;/g, '—').replace(/&ndash;/g, '–')
-       .replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-  t = t.split('\n').map((l) => l.replace(/[ \t]+$/g, '')).join('\n');
-  t = t.replace(/\n{3,}/g, '\n\n');
-  return t.trim();
-}
-
-function templateField(raw, name) {
-  const m = raw.match(new RegExp(`\\|\\s*${name}\\s*=\\s*([^\\n]*)`, 'i'));
-  return m ? m[1].trim() : '';
-}
-
 function slugify(s) {
   return s.toLowerCase().replace(/ё/g, 'е')
-    .replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 90);
+    .replace(/[«»"']/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 90);
 }
 
-async function fetchPages(titles, cache) {
-  const missing = titles.filter((t) => !cache[t]);
-  console.log(`to fetch: ${missing.length} of ${titles.length}`);
+// «Название (Бунин)» / «Костёр (Бунин: рассказ)»
+const WORK_RE = /\(Бунин[^)]*\)$/;
+
+function parseEntries(authorWikitext) {
+  const entries = new Map(); // title -> {title, label, genre, year}
+  for (const { line, h2, h3 } of sectionMap(authorWikitext)) {
+    let genre = null;
+    let year = null;
+    if (h2 === 'Поэзия' && /^Стихи\s+\d{4}/.test(h3 || '')) {
+      genre = 'Стихотворение';
+      const y = (line.match(/''[«»]?(\d{4})/) || [])[1];
+      year = y ? Number(y) : null;
+    } else if (h2 === 'Проза') {
+      genre = 'Рассказ';
+      const y = (line.match(/(?:,|\s)(\d{4})/) || [])[1];
+      year = y ? Number(y) : null;
+    } else {
+      continue;
+    }
+    if (!line.startsWith('*')) continue;
+    const re = /\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]*))?\]\]/g;
+    let m;
+    while ((m = re.exec(line))) {
+      const target = m[1].trim();
+      if (/^(Категория|Файл|Image|Изображение):/i.test(target)) continue;
+      if (!WORK_RE.test(target)) continue;
+      let label = (m[2] || target.replace(/\s*\(Бунин[^)]*\)$/, '')).replace(/'''?/g, '').trim();
+      label = label.replace(/^[«"]/, '').replace(/[»"]$/, '');
+      if (!entries.has(target)) entries.set(target, { title: target, label, genre, year });
+    }
+  }
+  return entries;
+}
+
+async function fetchWikitexts(titles, cache) {
+  const missing = titles.filter((t) => !cache[PAGE_ALIASES[t] || t]);
+  console.log(`текстов нет в кэше: ${missing.length} из ${titles.length}`);
   for (let i = 0; i < missing.length; i += 10) {
-    const chunk = missing.slice(i, i + 10);
-    let ok = false;
-    for (let attempt = 0; attempt < 5 && !ok; attempt++) {
+    const chunk = missing.slice(i, i + 10).map((t) => PAGE_ALIASES[t] || t);
+    for (let attempt = 0; attempt < 5; attempt++) {
       try {
         const data = await api({
           action: 'query', prop: 'revisions', rvslots: 'main', rvprop: 'content',
@@ -92,7 +86,7 @@ async function fetchPages(titles, cache) {
         });
         const redirects = data.query?.redirects || [];
         const norm = data.query?.normalized || [];
-        const byTitle = new Map(data.query?.pages?.map((p) => [p.title, p]) || []);
+        const byTitle = new Map((data.query?.pages || []).map((p) => [p.title, p]));
         for (const t of chunk) {
           let key = t;
           const n = norm.find((x) => x.from === t); if (n) key = n.to;
@@ -101,66 +95,156 @@ async function fetchPages(titles, cache) {
           const content = p?.revisions?.[0]?.slots?.main?.content;
           if (content) cache[t] = content;
         }
-        ok = true;
+        break;
       } catch (e) {
         console.warn('retry chunk', i, e.message);
         await sleep(3000 * (attempt + 1));
       }
     }
     await sleep(700);
-    if ((i / 10) % 5 === 0) console.log(`${i + chunk.length}/${missing.length}`);
+    if (Math.floor(i / 10) % 5 === 0) console.log(`${i + chunk.length}/${missing.length}`);
   }
 }
 
-async function main() {
-  await mkdir('data', { recursive: true });
-  let cache = {};
-  if (existsSync(CACHE)) {
-    cache = JSON.parse(await readFile(CACHE, 'utf8'));
-    console.log('cache entries:', Object.keys(cache).length);
-  }
+const ENTITIES = {
+  '&nbsp;': ' ', '&#160;': ' ', '&mdash;': '—', '&ndash;': '–',
+  '&laquo;': '«', '&raquo;': '»', '&quot;': '"', '&ldquo;': '“', '&rdquo;': '”',
+  '&amp;': '&', '&lt;': '<', '&gt;': '>', '&shy;': '', '&#91;': '[', '&#93;': ']',
+  '&#x2007;': ' ', '&#8199;': ' ', '&#x2009;': ' ', '&#8201;': ' ',
+  '&#8239;': ' ', '&#x202f;': ' ',
+};
 
-  console.log('fetching author page...');
-  const author = await wikitext(AUTHOR);
-  const entries = new Map();
+function decodeEntities(s) {
+  return s.replace(/&(?:nbsp|mdash|ndash|laquo|raquo|quot|ldquo|rdquo|amp|lt|gt|shy);|&#\d+;|&#x[0-9a-fA-F]+;/g,
+    (m) => ENTITIES[m] ?? (m.startsWith('&#x') || m.startsWith('&#X')
+      ? String.fromCodePoint(parseInt(m.slice(2, -1), 16))
+      : String.fromCharCode(Number(m.slice(2, -1)))));
+}
 
-  for (const { line, h2, h3 } of sectionMap(author)) {
-    const genre = GENRES[h3] || GENRES[h2];
-    if (!genre) continue;
-    if (!line.startsWith('*') && !line.includes('{{2О')) continue;
-    for (const { target, label } of linksFromLine(line)) {
-      if (target.startsWith('/') || target.includes('/Стихотворения')) continue;
-      if (!/\(Бунин\)$/.test(target)) continue;
-      if (!entries.has(target)) entries.set(target, { title: label, genre, year: null });
+// Дореформенная орфография → современная (для ранних текстов без ВТ-редакции).
+function modernizeOrthography(t) {
+  return t
+    .replace(/ѣ/g, 'е').replace(/ѳ/g, 'ф').replace(/ѵ/g, 'и').replace(/і/g, 'и')
+    .replace(/(\p{L})ъ(?=[\s\p{P}]|$)/gu, '$1');
+}
+
+// Очистка отрендерённого HTML подстраницы djvu-редакции.
+function cleanRenderedHtml(html) {
+  let h = html;
+  const t = h.indexOf('<div class="text"');
+  if (t !== -1) h = h.slice(t);
+  const end = h.lastIndexOf('</div>');
+  if (end !== -1) h = h.slice(0, end);
+  // маркеры страниц скана: [<a ...>163</a>]
+  h = h.replace(/\[\s*<a [^>]*>\s*\d+\s*<\/a>\s*\]/g, '');
+  h = h.replace(/<(style|link|script)\b[^>]*>[\s\S]*?<\/\1>/gi, '');
+  h = h.replace(/<(?:style|link|script)\b[^>]*\/?>/gi, '');
+  h = h.replace(/<\s*(?:br|\/p|\/div|\/h[1-6]|\/li|\/tr)\s*\/?>/gi, '\n');
+  h = h.replace(/<[^>]+>/g, '');
+  h = decodeEntities(h);
+  h = h.split('\n').map((l) => l.replace(/[ \t]+/g, ' ').trim()).join('\n');
+  return h.replace(/\n{3,}/g, '\n\n').trim();
+}
+
+async function fetchRendered(subpage, rcache) {
+  if (rcache[subpage] !== undefined) return rcache[subpage];
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const data = await api({ action: 'parse', page: subpage, prop: 'text' });
+      if (data.error) { rcache[subpage] = null; return null; }
+      const html = data.parse?.text;
+      rcache[subpage] = typeof html === 'string' ? html : (html?.['*'] ?? null);
+      return rcache[subpage];
+    } catch (e) {
+      console.warn('retry render', subpage, e.message);
+      await sleep(2500 * (attempt + 1));
     }
   }
+  return null;
+}
 
-  const cm = await api({ action: 'query', list: 'categorymembers', cmtitle: 'Категория:Поэзия Ивана Алексеевича Бунина', cmlimit: '500', cmtype: 'page' });
-  for (const { title } of cm.query.categorymembers) {
-    if (!/\(Бунин\)$/.test(title)) continue;
-    if (!entries.has(title)) entries.set(title, { title: title.replace(/\s*\(Бунин\)$/, ''), genre: 'Стихотворение', year: null });
-  }
-  console.log('entries:', entries.size);
+// Крупные повести, перечисленные на странице автора как «Рассказы»
+const NOT_STORY = { 'Деревня': 'Повесть', 'Суходол': 'Повесть' };
 
-  const titles = [...entries.keys()];
-  await fetchPages(titles, cache);
+// Страницы викитеки, названные иначе, чем ссылка на странице автора
+// («Кукушка», «Помпея» и рассказ «Костёр» на викитеке отсутствуют).
+const PAGE_ALIASES = {
+  'Вести с Родины (Бунин)': 'Вести с родины (Бунин)',
+};
+
+async function main() {
+  await mkdir('data', { recursive: true });
+
+  console.log('страница автора...');
+  const authorWikitext = await api({ action: 'parse', page: AUTHOR, prop: 'wikitext' })
+    .then((d) => (typeof d.parse.wikitext === 'string' ? d.parse.wikitext : d.parse.wikitext['*']));
+  const entries = parseEntries(authorWikitext);
+  console.log('произведений на странице автора:', entries.size);
+
+  const cache = existsSync(CACHE) ? JSON.parse(await readFile(CACHE, 'utf8')) : {};
+  await fetchWikitexts([...entries.keys()], cache);
   await writeFile(CACHE, JSON.stringify(cache), 'utf8');
-  console.log('cached:', Object.keys(cache).length);
+  await writeFile(ENTRIES, JSON.stringify([...entries.values()], null, 1), 'utf8');
 
+  const rcache = existsSync(RENDERCACHE) ? JSON.parse(await readFile(RENDERCACHE, 'utf8')) : {};
   const works = [];
-  for (const [title, meta] of entries) {
-    const raw = cache[title];
-    if (!raw) { console.warn('MISS', title); continue; }
-    const text = cleanWiki(raw);
-    if (text.length < 30) continue;
-    const created = templateField(raw, 'ДАТАСОЗДАНИЯ').match(/(1[89]\d\d|19\d\d|20\d\d)/);
+  let renders = 0;
+
+  for (const meta of entries.values()) {
+    const page = PAGE_ALIASES[meta.title] || meta.title;
+    const raw = cache[page];
+    if (!raw) { console.warn('MISS', meta.title); continue; }
+
+    let text = null;
+    let published = templateField(raw, 'ДАТАПУБЛИКАЦИИ') || null;
+    let source = templateField(raw, 'ИСТОЧНИК') || null;
+    let sourceUrl = WIKI + encodeURIComponent(meta.title.replace(/ /g, '_'));
+    const isPssStub = /\{\{\s*ПСС И\. А\. Бунина/.test(raw) || raw.trim().length < 600;
+
+    if (isPssStub) {
+      // djvu-заголовок: текст на подстранице «/ПСС 1915 (ВТ)» (совр. орфография),
+      // при её отсутствии — «/ПСС 1915 (ДО)».
+      const base = meta.title;
+      let html = await fetchRendered(`${base}/ПСС 1915 (ВТ)`, rcache);
+      let subpage = `${base}/ПСС 1915 (ВТ)`;
+      if (!html) {
+        html = await fetchRendered(`${base}/ПСС 1915 (ДО)`, rcache);
+        subpage = `${base}/ПСС 1915 (ДО)`;
+      }
+      if (html) {
+        text = cleanRenderedHtml(html);
+        sourceUrl = WIKI + encodeURIComponent(subpage.replace(/ /g, '_'));
+        const pm = html.match(/Опубл\.:.*?ws-published[^>]*>([^<]+)</);
+        if (pm) published = pm[1].trim();
+        if (!source) source = 'Бунин И. А. Полное собрание сочинений: в 6 т. — Пг.: Изд. т-ва А. Ф. Маркс, 1915. Т. 2 (Викитека, djvu)';
+        renders++;
+        await sleep(700);
+      } else {
+        console.warn('NO RENDER', meta.title);
+        continue;
+      }
+    } else {
+      text = cleanWiki(raw);
+    }
+
+    if (!text || text.length < 100) { console.warn('short', meta.title, text?.length); continue; }
+    // убрать служебные хвосты викитеки
+    text = text.replace(/\{\{[^{}]*\}\}/g, '').trim();
+    // ранние djvu-тексты в дореформенной орфографии — привести к современной
+    // (триггер — ѣ/ѳ или твёрдый знак в конце слова; украинские «і» в диалектных репликах не трогаем)
+    if (/[ѣѳ]/.test(text) || /\p{L}ъ(?=[\s\p{P}]|$)/u.test(text)) text = modernizeOrthography(text);
+
+    const genre = NOT_STORY[meta.label] || meta.genre;
     works.push({
-      title: meta.title, slug: slugify(meta.title), genre: meta.genre,
-      year: created ? Number(created[1]) : meta.year,
-      published: templateField(raw, 'ДАТАПУБЛИКАЦИИ') || null,
-      text, chars: text.length,
-      sourceUrl: `https://ru.wikisource.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`,
-      source: templateField(raw, 'ИСТОЧНИК') || null,
+      title: meta.label,
+      slug: slugify(meta.label),
+      genre,
+      year: meta.year,
+      published,
+      text,
+      chars: text.length,
+      sourceUrl,
+      source,
     });
   }
 
@@ -171,7 +255,8 @@ async function main() {
   await writeFile('data/works.json', JSON.stringify(unique, null, 1), 'utf8');
   const byGenre = {};
   unique.forEach((w) => (byGenre[w.genre] = (byGenre[w.genre] || 0) + 1));
-  console.log('written:', unique.length, byGenre);
+  console.log('written:', unique.length, byGenre, '| djvu-рендеров:', renders,
+    '| без года:', unique.filter((w) => !w.year).length);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

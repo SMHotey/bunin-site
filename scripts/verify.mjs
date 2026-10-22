@@ -170,8 +170,11 @@ if (config.affiliate?.enabled && books.length && !Object.values(config.affiliate
 const booksHtml = await readFile(join(DIST, 'books/index.html'), 'utf8');
 if (books.length && !booksHtml.includes('rel="sponsored')) errors.push('books: у ссылок нет rel="sponsored"');
 // Маркировка рекламы обязана быть в заданной форме: «Реклама. Рекламодатель … , ОГРН …»
+// Обязательна только если на странице есть партнёрские (рекламные) ссылки:
+// без ссылок маркировать нечего — раздел показывает обычные карточки изданий.
 const adv = config.affiliate?.advertiser || {};
-if (books.length && adv.name) {
+const hasAdLinks = booksHtml.includes('erid:');
+if (books.length && adv.name && hasAdLinks) {
   const required = `Реклама. Рекламодатель ${adv.name}${adv.ogrn ? `, ОГРН ${adv.ogrn}` : ''}.`;
   if (!booksHtml.includes(required)) errors.push(`books: нет обязательной маркировки «${required}»`);
 }

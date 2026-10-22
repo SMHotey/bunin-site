@@ -1,26 +1,48 @@
-# Иван Бунин — авторский сайт
+# Иван Бунин — авторский сайт (poet-bunin.ru)
 
-Создан из шаблона `esenin-dashboard`. Домен в конфиге: `https://poet-bunin.ru`.
+Создан из шаблона `esenin-dashboard`. Статическая генерация на Node без зависимостей:
+`scripts/build.mjs` + `scripts/sections.mjs` собирают 532 страницы в `dist/`.
 
-## Что уже есть
+## Текущее состояние (октябрь 2026)
 
-- Генератор: `scripts/build.mjs` + `scripts/sections.mjs` (`npm run build`, `npm run verify`).
-- Пустые `data/*.json` — разделы показывают заглушки, пока данные не заполнены.
-- `site.config.json`: имя, падежи, годы, роль автора; аналитика пустая.
-- Портрет-заглушка `public/img/portrait.jpg` — заменить.
+- `npm run verify` — пройден: 0 ошибок, 1 предупреждение (нет партнёрских ссылок «Читай-города»).
+- Библиотека: 458 произведений (425 стихотворений, 33 рассказа) с Викитеки.
+  Три вещи отсутствуют на викитеке («Кукушка», «Помпея», рассказ «Костёр») — при необходимости
+  добавляются в `data/extra-works.json`.
+- 19 персон, 27 событий хронологии, 9 мест с очерками, 8 тематических подборок, словарь,
+  12 вопросов FAQ, обзорные статьи биографии и 5 публикаций-разборов в `content/`.
+- Книги: 63 издания «Читай-города» с обложками (только «в наличии»); партнёрские ссылки
+  пока не сгенерированы — раздел работает без них.
+- Портрет и og.jpg — Wikimedia, Public Domain.
 
-## Порядок работы
+## Команды
 
-1. **Тексты.** `npm run import:works` (Викитека) → `npm run build:works`; редкие тексты и
-   автобиографии — в `data/extra-works.json`.
-2. **Люди и хронология.** `data/people.json`, `data/timeline.json`.
-3. **Разделы.** `data/places.json`, `topics.json`, `glossary.json`, `faq.json`, `music.json`,
-   `films.json`, `museums.json`, `monuments.json`, `languages.json` — факты плюс свои формулировки.
-4. **Книги.** Каталог магазина → `data/books-source.json` (скилл `chitai-gorod-affiliate`),
-   партнёрские ссылки → `python scripts/import-books.py`.
-5. **Проверить руками** страницы, где шаблон говорил о первом авторе: «гибель», «память»,
-   «музеи», «хронология». Скрипт печатает список таких файлов.
-6. **Портрет и OG.** `public/img/portrait.jpg`, `public/img/og.jpg` (1200×630, PD).
-7. **Аналитика.** `site.config.json → analytics.yandexMetrika`, страница `/privacy.html`.
-8. **Домен и деплой.** GitHub Pages, `dist/CNAME` пишет сборка из `siteUrl`; затем Enforce HTTPS.
-9. **Проверка.** `npm run verify` — 0 ошибок и 0 предупреждений, потом пуш в `master`.
+- `npm run build` — сборка; `npm run verify` — сборка + проверка ссылок и SEO.
+- `npm run preview` — локальный превью на http://localhost:4173.
+- `node scripts/import-works.mjs` — импорт произведений с Викитеки (использует кэш `data/raw-cache.json`).
+- `python scripts/import-books.py` — книги из `data/books-source.json` → `data/books.json` + обложки.
+- `npm run sync:prices` — ежедневное обновление цен (workflow `price-sync.yml`).
+
+## Данные
+
+`site.config.json` — домен, автор, featured-подборки главной, партнёрка, аналитика.
+`data/*.json` — люди, хронология, места, подборки, словарь, FAQ, музеи, фильмы, музыка,
+языки, наука, версии, книги. Тексты произведений — `data/works.json`.
+
+## Что осталось перед публикацией
+
+1. Партнёрские ссылки «Читай-города»: вход в `partners.chitai-gorod.ru` через vault,
+   генерация ссылок (скилл `chitai-gorod-affiliate`), затем `python scripts/import-books.py`.
+   После появления erid-ссылок verify сам потребует обязательную маркировку рекламы.
+2. Аналитика: новый счётчик Яндекс.Метрики под poet-bunin.ru → `site.config.json → analytics.yandexMetrika`.
+3. Репозиторий на GitHub, пуш в `master` (workflow `deploy.yml` сам соберёт и опубликует).
+4. DNS (reg.ru): A `@` → 185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153;
+   `www` → CNAME `smhotey.github.io`. После выпуска сертификата — включить Enforce HTTPS.
+5. Вебмастер Яндекса + Search Console, отправить sitemap.
+
+## Правила проекта
+
+- Тексты произведений — общественное достояние; тексты разделов — оригинальные.
+- Фотографии — Wikimedia Commons (PD) и товарные фото партнёрской программы, с подписью «Фото: Читай-город».
+- Цены на сайте не публикуются (`affiliate.showPrice = false`).
+- Тёмная тема по умолчанию; выбор читателя хранится в localStorage.

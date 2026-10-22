@@ -633,7 +633,7 @@ const home = `
       <a class="section-link" href="/places/">Все места →</a>
     </div>
     <div class="works-grid">
-      ${['konstantinovo', 'moskva', 'peterburg'].map((id) => places.find((p) => p.id === id)).filter(Boolean).map((p) => `<a class="work-card" href="/places/${p.id}.html">
+      ${['voronezh', 'moscow', 'paris'].map((id) => places.find((p) => p.id === id)).filter(Boolean).map((p) => `<a class="work-card" href="/places/${p.id}.html">
         <span class="genre">${esc(p.kicker)}</span><span class="title">${esc(p.title)}</span>
         <span class="year">${esc(p.years || '')}</span><span class="preview">${esc(p.subtitle)}</span>
       </a>`).join('')}

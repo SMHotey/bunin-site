@@ -1,6 +1,6 @@
 {
   "siteUrl": "https://poet-bunin.ru",
-  "updated": "2026-01-01",
+  "updated": "2026-10-22",
   "ogImage": "/img/og.jpg",
   "textsPublicDomain": true,
   "locale": "ru_RU",
@@ -17,14 +17,14 @@
     "years": "1870—1953",
     "birthDate": "1870-10-22",
     "deathDate": "1953-11-08",
-    "birthPlace": "",
-    "deathPlace": "",
+    "birthPlace": "Воронеж",
+    "deathPlace": "Париж",
     "shortDescription": "Русский писатель",
-    "lead": "",
+    "lead": "Русский писатель, первый русский лауреат Нобелевской премии по литературе, автор «Тёмных аллей», «Деревни» и «Жизни Клима Самгина» — мастер прозы, который тридцать лет прожил в изгнании и сохранял русский язык как родину.",
     "portrait": "/img/portrait.jpg",
     "portraitAlt": "Портрет: Иван Бунин",
     "portraitCaption": "Иван Бунин. Фотография.<br>Wikimedia Commons, Public Domain",
-    "footerAbout": "Сайт об авторе: Иван Бунин. Биография, тексты, люди, места и книги.",
+    "footerAbout": "Дашборд-лендинг об Иване Бунине: проверенная биография, люди вокруг писателя, полная библиотека произведений и научная литература.",
     "footerNote": "Материалы сверяются с академическими изданиями. Спорные вопросы вынесены в раздел «Версии».",
     "copyright": "© 2026 Проект о Бунине. Тексты произведений — общественное достояние.",
     "licenseNote": "Тексты произведений — общественное достояние. Фотографии — Wikimedia Commons (PD). Библиографические описания — в информационных целях."
@@ -35,12 +35,13 @@
     "friends": "Друзья",
     "wives": "Жёны",
     "women": "Женщины",
-    "children": "Дети"
+    "children": "Дети",
+    "contemporaries": "Современники"
   },
   "home": {
-    "featuredWorks": [],
-    "featuredPeople": [],
-    "keyEvents": []
+    "featuredWorks": ["Господин из Сан-Франциско", "Антоновские яблоки", "Тёмные аллеи", "Митина любовь", "Сны Господа", "Деревня"],
+    "featuredPeople": ["aleksey-nikolaevich", "lyudmila-aleksandrovna", "vera-murmtseva", "galina-kuznetsova", "chekhov", "gorky", "kuprin", "khodasevich"],
+    "keyEvents": ["1870-10-22", "1887", "1891", "1901", "1903", "1909", "1918", "1920", "1933", "1953-11-08"]
   },
   "affiliate": {
     "enabled": true,

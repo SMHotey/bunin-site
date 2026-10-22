@@ -253,7 +253,7 @@ export function buildSectionPages(ctx) {
       <ul>
         <li><a href="/versions.html">Версии и спорные вопросы</a></li>
         <li><a href="/people/">Люди вокруг писателя</a></li>
-        <li><a href="/places/peterburg.html">Петербург</a></li>
+        <li><a href="/places/paris.html">Париж</a></li>
         <li><a href="/research/">Научные работы</a></li>
         <li><a href="/faq.html">Частые вопросы</a></li>
       </ul>
