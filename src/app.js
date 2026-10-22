@@ -268,6 +268,11 @@
       poemPage.style.setProperty('--poem-size', sizes[sizeIndex] + 'px');
       localStorage.setItem('poem-size', String(sizeIndex));
     });
+    // ?print=1 — открыть диалог печати сразу: ссылка для поисковых сценариев
+    // «Господин из Сан-Франциско распечатать» (кнопка «Распечатать» на странице делает то же).
+    if (new URLSearchParams(location.search).get('print') === '1') {
+      setTimeout(() => window.print(), 250);
+    }
   }
 
   // ---------- книги: фильтры по типу издания и издательству + «показать ещё» ----------

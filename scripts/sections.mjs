@@ -169,6 +169,7 @@ export function buildSectionPages(ctx) {
     <div class="meta-line"><span class="badge">${esc(p.kicker)}</span><span>${esc(p.region)}</span>${p.years ? `<span>${esc(p.years)}</span>` : ''}</div>
     <h1 style="font-size:clamp(30px,4.6vw,44px);margin-bottom:10px">${esc(p.title)}</h1>
     <p style="font-family:var(--serif);font-size:19px;color:var(--ink-soft);max-width:64ch">${esc(p.lead)}</p>
+    ${p.photo ? `<figure class="place-photo"><img src="${esc(p.photo)}" alt="${esc(p.photoAlt || p.title)}" loading="lazy" width="900" height="600"><figcaption>${esc(p.photoCredit || 'Фото: Wikimedia Commons')}</figcaption></figure>` : ''}
     <div class="panel" style="margin:20px 0 26px">
       <h3 style="font-size:18px">Коротко</h3>
       <dl class="fact-list">
@@ -177,7 +178,9 @@ export function buildSectionPages(ctx) {
     </div>
     ${(p.blocks || []).map((b) => `<h2>${esc(b.h)}</h2><p>${esc(b.p)}</p>`).join('')}
     ${workChips(p.works) ? `<h2>В произведениях</h2>${workChips(p.works)}` : ''}
-    <div class="source-box"><b>О тексте.</b> Очерк написан для проекта по общедоступным сведениям и музейным описаниям. Даты и адреса уточняйте на официальных сайтах музеев: режим работы и экспозиции меняются.</div>
+    ${(p.links || []).length ? `<h2>Официальные сайты и источники</h2>
+    <ul class="ext-links">${p.links.map((l) => `<li><a href="${esc(l.url)}" rel="noopener external" target="_blank">${esc(l.label)} <span aria-hidden="true">↗</span></a></li>`).join('')}</ul>` : ''}
+    <div class="source-box"><b>О тексте.</b> Очерк написан для проекта по общедоступным сведениям и музейным описаниям. Даты и адреса уточняйте на официальных сайтах музеев: режим работы и экспозиции меняются. ${p.photo ? `Фото: ${esc(p.photoCredit || 'Wikimedia Commons')}.` : ''}</div>
   </article>
   <aside>
     <div class="aside-card">
@@ -281,6 +284,7 @@ export function buildSectionPages(ctx) {
     <h3 style="font-size:22px">${esc(m.name)}</h3>
     ${m.address ? `<p style="font-size:13px;color:var(--muted);margin:0 0 8px">${esc(m.address)}</p>` : ''}
     <p style="color:var(--ink-soft);max-width:72ch">${esc(m.about)}</p>
+    ${m.url ? `<p style="margin:8px 0 0"><a href="${esc(m.url)}" rel="noopener external" target="_blank">Официальный сайт <span aria-hidden="true">↗</span></a></p>` : ''}
     <div class="tag-row">${(m.what || []).map((x) => `<span class="tag">${esc(x)}</span>`).join('')}</div>
     ${m.note ? `<p style="font-size:13px;color:var(--muted);margin:10px 0 0">${esc(m.note)}</p>` : ''}
   </div>`).join('')}
@@ -524,6 +528,46 @@ export function buildSectionPages(ctx) {
       '@type': 'CollectionPage', name: 'Алфавитный указатель произведений Бунина', inLanguage: LANG,
     } });
   search.push({ t: 'Алфавитный указатель', u: '/works/az.html', g: 'Раздел', k: 'Библиотека', s: 'Все произведения по алфавиту' });
+
+  // ---------- печать: /print/ — страница под запросы «распечатать произведение», «текст для печати» ----------
+  const genreGroups = new Map();
+  for (const w of works) {
+    const g = w.genre || 'Текст';
+    if (!genreGroups.has(g)) genreGroups.set(g, []);
+    genreGroups.get(g).push(w);
+  }
+  const genreList = [...genreGroups.keys()].sort((a, b) => genreGroups.get(b).length - genreGroups.get(a).length);
+  page('print/index.html',
+    `Распечатать произведения Бунина — тексты для печати на A4`,
+    `Все ${works.length} произведений Бунина готовы к печати: стихотворения и рассказы в формате, удобном для бумаги. Откройте нужное и нажмите «Распечатать» — меню и обвязка на печать не попадают. Без регистрации.`,
+    `${crumbs([['/', 'Главная'], ['/print/', 'Для печати']])}
+<div class="wrap page-head">
+  <h1>Распечатать произведения ${A.genitive}</h1>
+  <p>${works.length} ${plural(works.length, ['текст', 'текста', 'текстов'])} — стихотворения и рассказы — свёрстаны так, чтобы печатать их на A4 без правок: без меню, кнопок и оформления, только текст и подпись с источником.</p>
+</div>
+<div class="wrap" style="padding-bottom:40px">
+  <div class="note">
+    <b>Как распечатать.</b> Откройте произведение и нажмите «Распечатать» (или Ctrl+P) —
+    печать начнётся сразу. Если нужен конкретный год или жанр — начните с подборки ниже,
+    дальше поможет <a href="/works/az.html">алфавитный указатель</a>.
+  </div>
+</div>
+<div class="wrap" style="padding-bottom:50px">
+  ${genreList.map((g) => {
+    const list = genreGroups.get(g).slice().sort((a, b) => a.title.localeCompare(b.title, 'ru'));
+    return `<section style="margin-top:26px">
+      <h2 style="font-size:24px;border-bottom:1px solid var(--line);padding-bottom:6px">${esc(g)} — ${list.length}</h2>
+      <ul class="az-list">
+        ${list.map((w) => `<li><a href="${workUrl(w)}">${esc(w.title)}</a>${w.year ? `<span class="tw-year">${w.year}</span>` : ''}<a class="tw-print" href="${workUrl(w)}?print=1" title="Открыть и напечатать">⎙ распечатать</a></li>`).join('')}
+      </ul>
+    </section>`;
+  }).join('')}
+</div>`,
+    { active: 'works', breadcrumb: [['/', 'Главная'], ['/print/', 'Для печати']], jsonLd: {
+      '@type': 'CollectionPage', name: `Распечатать произведения ${A.genitive}`, inLanguage: LANG,
+      url: `${SITE}/print/`,
+    } });
+  search.push({ t: 'Распечатать произведения', u: '/print/', g: 'Раздел', k: 'Для печати', s: 'Тексты для печати на A4' });
 
   // ---------- доп. страницы поиска ----------
   for (const p of places) search.push({ t: `${p.title} — место`, u: `/places/${p.id}.html`, g: 'Место', k: p.kicker, s: p.subtitle });

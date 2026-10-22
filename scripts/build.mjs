@@ -315,7 +315,10 @@ ${ogImage ? `<meta name="twitter:image" content="${SITE}${esc(ogImage)}">` : ''}
 <a class="skip-link" href="#main">К содержанию</a>
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="/"><span class="brand-mark">${esc(A.lastName)}</span><span class="brand-years">${esc(A.years)}</span></a>
+    <a class="brand" href="/">
+      <span class="brand-top"><span class="brand-mark">${esc(A.lastName)}</span><span class="brand-years">${esc(A.years)}</span></span>
+      ${A.firstName && config.author?.patronymic ? `<span class="brand-sub">${esc(A.firstName)} ${esc(config.author.patronymic)}</span>` : ''}
+    </a>
     <nav class="main-nav" aria-label="Основная навигация">${navHtml}</nav>
     <div class="header-tools">
       <button class="icon-btn" data-search-open aria-label="Поиск по сайту" title="Поиск (Ctrl+K)" aria-haspopup="dialog" aria-controls="site-search">⌕</button>
@@ -405,7 +408,8 @@ function workCard(w) {
 }
 
 function personCard(p) {
-  return `<a class="person-card" href="/people/${p.id}.html">
+  return `<a class="person-card${p.photo ? ' has-photo' : ''}" href="/people/${p.id}.html">
+    ${p.photo ? `<img class="person-thumb" src="${esc(p.photo)}" alt="${esc(p.photoAlt || p.name)}" loading="lazy" width="96" height="120">` : ''}
     <span class="role">${esc(p.role)}</span>
     <span class="name">${esc(p.name)}</span>
     <span class="years">${esc(p.years)}</span>
@@ -666,6 +670,7 @@ const home = `
     <div class="tag-row" style="gap:8px">
       ${topics.map((t) => `<a class="chip" href="/topics/${t.id}.html">${esc(t.title.replace('Стихи Бунина ', '').replace(/^о /, ''))}</a>`).join('')}
       <a class="chip" href="/works/az.html">Алфавитный указатель</a>
+      <a class="chip" href="/print/">Для печати</a>
       <a class="chip" href="/glossary.html">Словарь</a>
       <a class="chip" href="/faq.html">Частые вопросы</a>
     </div>
@@ -827,7 +832,7 @@ function personPage(p) {
   return `${crumbs([['/', 'Главная'], ['/people/', 'Люди'], [`/people/${p.category}.html`, categories[p.category] || 'Люди'], [null, p.name]])}
   <div class="wrap">
     <div class="person-hero">
-      <div class="person-mono" aria-hidden="true">${esc(String(p.name || '?')[0])}</div>
+      ${p.photo ? `<figure class="person-photo"><img src="${esc(p.photo)}" alt="${esc(p.photoAlt || p.name)}" loading="lazy" width="300" height="375"><figcaption>${esc(p.photoCredit || 'Фото: Wikimedia Commons')}</figcaption></figure>` : `<div class="person-mono" aria-hidden="true">${esc(String(p.name || '?')[0])}</div>`}
       <div>
         <div class="meta-line"><span class="badge">${esc(p.role)}</span><span>${esc(p.years)}</span></div>
         <h1 style="font-size:clamp(30px,4.5vw,44px)">${esc(p.name)}</h1>
@@ -916,6 +921,7 @@ ${crumbs([['/', 'Главная'], [null, 'Библиотека']])}
   <div class="tag-row" style="margin-top:14px">
     <a class="chip" href="/topics/">Стихи по темам</a>
     <a class="chip" href="/works/az.html">Алфавитный указатель</a>
+    <a class="chip" href="/print/">Для печати</a>
     <a class="chip" href="/glossary.html">Словарь к стихам</a>
     <a class="chip" href="/legacy/music.html">Песни и романсы</a>
   </div>
@@ -983,10 +989,17 @@ function workPage(w, index) {
       <button data-poem-action="bigger" aria-label="Увеличить шрифт">A+</button>
       <button data-poem-action="reading">Режим чтения</button>
       <button data-poem-action="plain">Без оформления</button>
-      <button data-poem-action="print">Печать</button>
+      <button data-poem-action="print">Распечатать</button>
       <button data-poem-action="copy">Копировать</button>
     </div>
+    <div class="print-cta">
+      <b>Распечатать это произведение.</b> Нажмите «Распечатать» — на бумагу попадёт только текст
+      «${esc(w.title)}», без меню и обвязки сайта. Страница свёрстана так, чтобы печатать её на A4
+      без правок. <button data-poem-action="print">Распечатать</button>
+      <a href="/print/">Все произведения ${A.genitive} для печати →</a>
+    </div>
     <div class="poem">${esc(w.text)}</div>
+    <p class="print-only">Иван Алексеевич Бунин. «${esc(w.title)}». Сайт о писателе: poet-bunin.ru — текст в общественном достоянии.</p>
     <div class="source-box">
       <b>Источник текста.</b> <a href="${esc(w.sourceUrl)}" rel="noopener">${esc(w.title)}</a> в Викитеке.
       ${w.source ? `<br><b>Редакция/издание:</b> ${esc(cleanSource(w.source))}` : ''}
@@ -1435,14 +1448,15 @@ for (let i = 0; i < works.length; i++) {
   await writePage(`works/${w.slug}.html`, layout({
     title: (() => {
       // Полное название + жанр + «текст» — ради CTR в выдаче, но не длиннее 88 символов.
-      const suffix = ` — ${String(w.genre || 'текст').toLowerCase()} ${A.genitive}: текст`;
+      // «Читать и распечатать» — частый поисковый сценарий: такую формулировку ищут.
+      const suffix = ` — ${String(w.genre || 'текст').toLowerCase()} ${A.genitive}: читать, распечатать`;
       const quoted = `«${w.title}»`;
       if ((quoted + suffix).length <= 88) return quoted + suffix;
-      const plain = `${w.title} — ${A.name}`;
+      const plain = `${w.title} — ${A.name}: читать, распечатать`;
       if (plain.length <= 88) return plain;
-      return `${w.title.slice(0, Math.max(40, 88 - A.name.length - 4)).trim()}… — ${A.name}`;
+      return `${w.title.slice(0, Math.max(40, 88 - A.name.length - 21)).trim()}… — ${A.name}: читать, распечатать`;
     })(),
-    description: `«${w.title}» — ${String(w.genre || '').toLowerCase()} ${A.genitive}${w.year ? ', ' + w.year : ''}. ${firstLine(w.text).slice(0, 120)} Читайте полный текст с указанием источника.`,
+    description: `«${w.title}» — ${String(w.genre || '').toLowerCase()} ${A.genitive}${w.year ? ', ' + w.year : ''}. ${firstLine(w.text).slice(0, 100)} Полный текст онлайн, версия для печати на A4 — без регистрации.`,
     content: workPage(w, i), active: 'works', ogType: 'article', jsonLd: ld,
     breadcrumb: [['/', 'Главная'], ['/works/', 'Библиотека'], [null, w.title]],
   }));

@@ -143,12 +143,14 @@ p { margin: 0 0 1em; }
   min-height: 72px;
 }
 
-.brand { display: flex; align-items: baseline; gap: 10px; color: var(--ink); text-decoration: none; }
+.brand { display: flex; flex-direction: column; gap: 1px; color: var(--ink); text-decoration: none; }
 .brand:hover { text-decoration: none; }
+.brand-top { display: flex; align-items: baseline; gap: 10px; }
 .brand-mark {
   font-family: var(--serif); font-size: 24px; letter-spacing: .06em;
 }
 .brand-years { font-size: 12px; color: var(--muted); letter-spacing: .18em; }
+.brand-sub { font-size: 11.5px; color: var(--muted); letter-spacing: .05em; font-weight: 400; }
 
 .main-nav { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
 .main-nav a {
@@ -473,6 +475,29 @@ select, .select {
   border: 1px solid var(--line); border-radius: 50%; width: 160px; height: 160px;
   display: grid; place-items: center; background: var(--card);
 }
+/* фото персоны: заменяет монограмму, тот же слот в hero */
+.person-photo { margin: 0; max-width: 300px; }
+.person-photo img {
+  width: 100%; height: auto; border-radius: 12px;
+  border: 1px solid var(--line); display: block;
+}
+.person-photo figcaption, .place-photo figcaption {
+  font-size: 11.5px; color: var(--muted); margin-top: 6px; line-height: 1.4;
+}
+/* миниатюра в карточке списка */
+.person-card { position: relative; }
+.person-thumb {
+  float: right; width: 64px; height: 80px; object-fit: cover;
+  border-radius: 8px; border: 1px solid var(--line); margin: 0 0 8px 12px;
+}
+/* фото места — после лид-абзаца */
+.place-photo { margin: 18px 0 22px; }
+.place-photo img {
+  width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); display: block;
+}
+/* внешние ссылки (музеи, источники) */
+.ext-links { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 6px; }
+.ext-links a { font-size: 15px; }
 
 /* ---------- research ---------- */
 
@@ -749,6 +774,11 @@ select, .select {
 .az-list { list-style: none; padding: 0; margin: 8px 0 0; columns: 2; column-gap: 34px; }
 .az-list li { break-inside: avoid; padding: 4px 0; font-size: 15px; }
 .az-list .tw-year { margin-left: 8px; }
+.tw-print {
+  margin-left: 10px; font-size: 12px; color: var(--muted); white-space: nowrap;
+  border: 1px solid var(--line); border-radius: 6px; padding: 1px 7px; text-decoration: none;
+}
+.tw-print:hover { color: var(--ink); border-color: var(--gold, #a98648); }
 
 /* ---------- responsive ---------- */
 
@@ -837,11 +867,28 @@ select, .select {
 
 @media print {
   .site-header, .site-footer, .poem-tools, .hero-actions, .search-dialog { display: none !important; }
-  .desk-art, .error-art { display: none !important; }
+  .desk-art, .error-art, .print-cta, .chip, .tag-row, .related, .crumbs, .meta-line { display: none !important; }
+  .print-only { display: block !important; }
   body { background: #fff; color: #000; }
-  .poem { font-size: 14pt; line-height: 1.6; }
+  .poem { font-size: 14pt; line-height: 1.6; white-space: pre-wrap; }
+  .poem-page { padding-top: 0 !important; }
+  .poem-title { font-size: 20pt; margin: 0 0 12pt; }
   a { color: #000; text-decoration: none; }
+  .source-box { border-color: #999; font-size: 10pt; }
+  @page { margin: 18mm 20mm; }
 }
+
+.print-only { display: none; }
+.print-cta {
+  margin: 14px 0; padding: 10px 14px; border: 1px solid var(--line);
+  border-radius: 10px; font-size: 13.5px; color: var(--ink-soft); line-height: 1.6;
+}
+.print-cta button {
+  margin-left: 10px; padding: 5px 12px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--card); color: var(--ink); cursor: pointer; font-size: 13px;
+}
+.print-cta button:hover { border-color: var(--gold, #a98648); }
+.print-cta a { margin-left: 10px; }
 
 .hidden { display: none !important; }
 
