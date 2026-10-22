@@ -169,7 +169,11 @@ export function buildSectionPages(ctx) {
     <div class="meta-line"><span class="badge">${esc(p.kicker)}</span><span>${esc(p.region)}</span>${p.years ? `<span>${esc(p.years)}</span>` : ''}</div>
     <h1 style="font-size:clamp(30px,4.6vw,44px);margin-bottom:10px">${esc(p.title)}</h1>
     <p style="font-family:var(--serif);font-size:19px;color:var(--ink-soft);max-width:64ch">${esc(p.lead)}</p>
-    ${p.photo ? `<figure class="place-photo"><img src="${esc(p.photo)}" alt="${esc(p.photoAlt || p.title)}" loading="lazy" width="900" height="600"><figcaption>${esc(p.photoCredit || 'Фото: Wikimedia Commons')}</figcaption></figure>` : ''}
+    ${(() => {
+      const photos = p.photos || (p.photo ? [{ src: p.photo, alt: p.photoAlt, caption: p.photoCredit }] : []);
+      if (!photos.length) return '';
+      return photos.map((ph) => `<figure class="place-photo"><img src="${esc(ph.src)}" alt="${esc(ph.alt || p.title)}" loading="lazy" width="900" height="600"><figcaption>${esc(ph.caption || 'Фото: Wikimedia Commons')}</figcaption></figure>`).join('');
+    })()}
     <div class="panel" style="margin:20px 0 26px">
       <h3 style="font-size:18px">Коротко</h3>
       <dl class="fact-list">
@@ -180,7 +184,7 @@ export function buildSectionPages(ctx) {
     ${workChips(p.works) ? `<h2>В произведениях</h2>${workChips(p.works)}` : ''}
     ${(p.links || []).length ? `<h2>Официальные сайты и источники</h2>
     <ul class="ext-links">${p.links.map((l) => `<li><a href="${esc(l.url)}" rel="noopener external" target="_blank">${esc(l.label)} <span aria-hidden="true">↗</span></a></li>`).join('')}</ul>` : ''}
-    <div class="source-box"><b>О тексте.</b> Очерк написан для проекта по общедоступным сведениям и музейным описаниям. Даты и адреса уточняйте на официальных сайтах музеев: режим работы и экспозиции меняются. ${p.photo ? `Фото: ${esc(p.photoCredit || 'Wikimedia Commons')}.` : ''}</div>
+    <div class="source-box"><b>О тексте.</b> Очерк написан для проекта по общедоступным сведениям и музейным описаниям. Даты и адреса уточняйте на официальных сайтах музеев: режим работы и экспозиции меняются. ${(p.photos || (p.photo ? [1] : [])).length ? `Фото: ${(p.photos || [{ caption: p.photoCredit }]).map((ph) => esc(ph.caption || 'Wikimedia Commons')).join('; ')}.` : ''}</div>
   </article>
   <aside>
     <div class="aside-card">
@@ -284,7 +288,7 @@ export function buildSectionPages(ctx) {
     <h3 style="font-size:22px">${esc(m.name)}</h3>
     ${m.address ? `<p style="font-size:13px;color:var(--muted);margin:0 0 8px">${esc(m.address)}</p>` : ''}
     <p style="color:var(--ink-soft);max-width:72ch">${esc(m.about)}</p>
-    ${m.url ? `<p style="margin:8px 0 0"><a href="${esc(m.url)}" rel="noopener external" target="_blank">Официальный сайт <span aria-hidden="true">↗</span></a></p>` : ''}
+    ${m.url ? `<p style="margin:8px 0 0"><a href="${esc(m.url)}" rel="noopener external" target="_blank">${esc(m.urlLabel || 'Официальный сайт')} <span aria-hidden="true">↗</span></a></p>` : ''}
     <div class="tag-row">${(m.what || []).map((x) => `<span class="tag">${esc(x)}</span>`).join('')}</div>
     ${m.note ? `<p style="font-size:13px;color:var(--muted);margin:10px 0 0">${esc(m.note)}</p>` : ''}
   </div>`).join('')}

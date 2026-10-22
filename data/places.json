@@ -51,8 +51,25 @@
   ],
   "links": [
    {
-    "label": "Воронежский областной краеведческий музей",
-    "url": "http://museum-vrn.ru/"
+    "label": "Музей И. А. Бунина — Воронежский областной литературный музей",
+    "url": "https://voronezhliter.ru/muzej-ivana-bunina-2"
+   }
+  ],
+  "photos": [
+   {
+    "src": "/img/places/voronezh-museum.jpg",
+    "alt": "Главный дом усадьбы Германовской — музей Ивана Бунина в Воронеже",
+    "caption": "Усадьба Германовской, главный дом: музей И. А. Бунина. Фото: Ku6epKpa6, Wikimedia Commons, CC BY-SA 4.0"
+   },
+   {
+    "src": "/img/places/voronezh-birth.jpg",
+    "alt": "Дом в Воронеже, в котором родился Иван Бунин",
+    "caption": "Дом, в котором родился И. А. Бунин. Фото: Елена Смольянинова, Wikimedia Commons, CC BY-SA 3.0"
+   },
+   {
+    "src": "/img/places/voronezh-plaque.jpg",
+    "alt": "Мемориальная доска на доме Бунина в Воронеже",
+    "caption": "Мемориальная доска на доме Бунина. Фото: Елена Смольянинова, Wikimedia Commons, CC BY-SA 3.0"
    }
   ]
  },
@@ -159,7 +176,13 @@
   ],
   "photo": "/img/places/yelets-gymnasium.jpg",
   "photoAlt": "Елецкая мужская гимназия, около 1890 года",
-  "photoCredit": "Елец. Мужская гимназия, около 1890. Wikimedia Commons, Public Domain"
+  "photoCredit": "Елец. Мужская гимназия, около 1890. Wikimedia Commons, Public Domain",
+  "links": [
+   {
+    "label": "Литературно-мемориальный музей И. А. Бунина — официальный сайт",
+    "url": "https://bunin.eletsmuseum.ru/"
+   }
+  ]
  },
  {
   "id": "orel",
@@ -213,7 +236,13 @@
   ],
   "photo": "/img/places/oryol-museum.jpg",
   "photoAlt": "Дом-музей Ивана Бунина в Орле, 2016 год",
-  "photoCredit": "Дом-музей И. А. Бунина, Орёл, 2016. Фото: Vlad-Mier, Wikimedia Commons, CC BY-SA 4.0"
+  "photoCredit": "Дом-музей И. А. Бунина, Орёл, 2016. Фото: Vlad-Mier, Wikimedia Commons, CC BY-SA 4.0",
+  "links": [
+   {
+    "label": "Музей И. А. Бунина — страница на туристическом портале Орловской области",
+    "url": "https://www.tourism-orel.ru/istoriya_i_kultura/muzei/muzei_bunina"
+   }
+  ]
  },
  {
   "id": "poltava",
@@ -477,13 +506,22 @@
     "url": "/places/voronezh.html"
    }
   ],
-  "photo": "/img/places/paris-house.jpg",
-  "photoAlt": "Дом в Париже, где Бунин жил с 1920 по 1953 год",
-  "photoCredit": "Париж, дом, где И. А. Бунин жил в 1920—1953 годах. Фото: Patrik Kunec, Wikimedia Commons, CC BY-SA 3.0",
   "links": [
    {
     "label": "Нобелевский фонд: Иван Бунин, 1933",
     "url": "https://www.nobelprize.org/prizes/literature/1933/bunin/facts/"
+   }
+  ],
+  "photos": [
+   {
+    "src": "/img/places/paris-house.jpg",
+    "alt": "Дом в Париже, где жил Иван Бунин в 1920—1953 годах",
+    "caption": "Париж, дом, где И. А. Бунин жил с 1920 по 1953 год. Фото: Patrik Kunec, Wikimedia Commons, CC BY-SA 3.0"
+   },
+   {
+    "src": "/img/places/paris-grave.jpg",
+    "alt": "Могила Ивана Бунина на кладбище Сент-Женевьев-де-Буа",
+    "caption": "Могила на кладбище Сент-Женевьев-де-Буа. Фото: Antoine Rex, Wikimedia Commons, CC0"
    }
   ]
  }
