@@ -1,0 +1,23 @@
+{
+  "name": "author-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Дашборд-лендинг о Иване Бунине: биография, люди, библиотека произведений, научные работы",
+  "scripts": {
+    "import:genres": "node scripts/import-genres.mjs",
+    "import:works": "node scripts/import-works.mjs",
+    "build:works": "node scripts/build-works.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check-links.mjs",
+    "sync:prices": "node scripts/sync-prices.mjs",
+    "verify": "npm run build && npm run check && node scripts/verify.mjs",
+    "verify:strict": "npm run build && npm run check && node scripts/verify.mjs --strict",
+    "serve": "python -m http.server 4173 --directory dist",
+    "preview": "npm run build && npm run serve",
+    "dev": "npm run build && npm run serve"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

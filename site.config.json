@@ -1,0 +1,85 @@
+{
+  "siteUrl": "https://poet-bunin.ru",
+  "updated": "2026-01-01",
+  "ogImage": "/img/og.jpg",
+  "textsPublicDomain": true,
+  "locale": "ru_RU",
+  "lang": "ru",
+  "author": {
+    "firstName": "Иван",
+    "lastName": "Бунин",
+    "name": "Иван Бунин",
+    "fullName": "Иван Алексеевич Бунин",
+    "genitive": "Бунина",
+    "prepositional": "Бунине",
+    "role": "писатель",
+    "roleGenitive": "писателя",
+    "years": "1870—1953",
+    "birthDate": "1870-10-22",
+    "deathDate": "1953-11-08",
+    "birthPlace": "",
+    "deathPlace": "",
+    "shortDescription": "Русский писатель",
+    "lead": "",
+    "portrait": "/img/portrait.jpg",
+    "portraitAlt": "Портрет: Иван Бунин",
+    "portraitCaption": "Иван Бунин. Фотография.<br>Wikimedia Commons, Public Domain",
+    "footerAbout": "Сайт об авторе: Иван Бунин. Биография, тексты, люди, места и книги.",
+    "footerNote": "Материалы сверяются с академическими изданиями. Спорные вопросы вынесены в раздел «Версии».",
+    "copyright": "© 2026 Проект о Бунине. Тексты произведений — общественное достояние.",
+    "licenseNote": "Тексты произведений — общественное достояние. Фотографии — Wikimedia Commons (PD). Библиографические описания — в информационных целях."
+  },
+  "peopleCategories": {
+    "family": "Семья",
+    "relatives": "Родственники",
+    "friends": "Друзья",
+    "wives": "Жёны",
+    "women": "Женщины",
+    "children": "Дети"
+  },
+  "home": {
+    "featuredWorks": [],
+    "featuredPeople": [],
+    "keyEvents": []
+  },
+  "affiliate": {
+    "enabled": true,
+    "showPrice": false,
+    "advertiser": {
+      "name": "ООО «ГРАМОТА»",
+      "ogrn": "1037706012376"
+    },
+    "disclosure": "Материал содержит рекламу. Ссылки на книги — партнёрские: если вы купите книгу по такой ссылке, проект может получить вознаграждение от магазина. Цена для покупателя не меняется; наличие, цена и формат уточняются на стороне магазина.",
+    "stores": {
+      "litres": {
+        "label": "ЛитРес",
+        "tagParam": "lfrom",
+        "tag": "",
+        "search": "https://www.litres.ru/search/?q={q}"
+      },
+      "ozon": {
+        "label": "Ozon",
+        "tagParam": "",
+        "tag": "",
+        "search": "https://www.ozon.ru/search/?text={q}"
+      },
+      "labirint": {
+        "label": "Лабиринт",
+        "tagParam": "",
+        "tag": "",
+        "search": "https://www.labirint.ru/search/?q={q}"
+      },
+      "chitai-gorod": {
+        "label": "Читай-город",
+        "tagParam": "",
+        "tag": "",
+        "search": "https://www.chitai-gorod.ru/search.html?query={q}",
+        "note": "Партнёрские ссылки магазин выдаёт готовыми: https://www.chitai-gorod.ru/r/XXXX?erid=… — подставлять метку не нужно, erid уже внутри ссылки."
+      }
+    }
+  },
+  "analytics": {
+    "yandexMetrika": "",
+    "googleAnalytics": ""
+  }
+}
