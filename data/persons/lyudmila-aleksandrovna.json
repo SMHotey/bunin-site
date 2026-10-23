@@ -1,0 +1,90 @@
+{
+ "facts": [
+  {
+   "claim": "Людмила Александровна Бунина, урождённая Чубарова (1835?—1910), — мать писателя.",
+   "source": "https://ru.wikipedia.org/wiki/Бунин,_Иван_Алексеевич"
+  },
+  {
+   "claim": "Происходила из дворянского рода Чубаровых; её предки были помещиками Костромской, Московской, Орловской и Тамбовской губерний.",
+   "source": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  },
+  {
+   "claim": "Приходилась мужу дальней родственницей; Иван Бунин, изучая родословную, заключил: «Мать наша двоюродная племянница отцу».",
+   "source": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  },
+  {
+   "claim": "Воспитанная на Пушкине и Жуковском, она по-старинному нараспев читала поэтов и была глубоко религиозной.",
+   "source": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  },
+  {
+   "claim": "Родила девятерых детей, пятеро из которых скончались в раннем детстве.",
+   "source": "https://ru.wikipedia.org/wiki/Бунин,_Иван_Алексеевич"
+  },
+  {
+   "claim": "Пережила гибель троих детей от крупа после того, как родственница помазала их «святым маслицем», взятым у больных крестьянских детей.",
+   "source": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  },
+  {
+   "claim": "По обету за спасение арестованного по политическому делу сына Юлия была вегетарианкой.",
+   "source": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  },
+  {
+   "claim": "Страдала астмой; последние годы жила у детей — в Грязях у дочери Марии и в Ефремове у сына Евгения.",
+   "source": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  },
+  {
+   "claim": "Скончалась в ночь с 15 на 16 июля 1910 года в Ефремове.",
+   "source": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  },
+  {
+   "claim": "Благословила Ивана на самостоятельную жизнь родовой чубаровской иконкой в серебряной ризе; он не расставался с ней до конца жизни.",
+   "source": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  }
+ ],
+ "relations": [
+  {
+   "date": "1856",
+   "event": "Вышла замуж за Алексея Николаевича Бунина, вернувшегося с Крымской войны.",
+   "source": "https://ru.wikipedia.org/wiki/Бунин,_Иван_Алексеевич"
+  },
+  {
+   "date": "1870",
+   "event": "Рождение сына Ивана в Воронеже.",
+   "source": "https://ru.wikipedia.org/wiki/Бунин,_Иван_Алексеевич"
+  },
+  {
+   "date": "1907",
+   "event": "В начале июля 1907 года в ефремовском доме сына Евгения собралась вся семья; здесь с ней впервые увиделась Вера Николаевна Муромцева.",
+   "source": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  },
+  {
+   "date": "1910-07-15",
+   "event": "Умерла в Ефремове; накануне настояла, чтобы Иван уехал и не присутствовал при её кончине.",
+   "source": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  },
+  {
+   "date": "1917-10-12",
+   "event": "Бунин записал в дневнике, что мать похоронена в роще в Ефремове и что на её могиле он «никогда не был».",
+   "source": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  }
+ ],
+ "unknown": [
+  "Год рождения: в литературе указывается 1835 со знаком вопроса; полностью 1834 не исключён.",
+  "Точная дата венчания в 1856 году не установлена.",
+  "Полный список девяти детей и судьба выживших в доступных источниках не приведены.",
+  "Точное место могилы в Ефремове (роща) не локализовано.",
+  "Дата смерти в пересказах колеблется между 15 и 16 июля 1910 года — в источнике указана ночь с 15 на 16.",
+  "Сведения о её родителях и детстве отсутствуют."
+ ],
+ "sources": [
+  {
+   "label": "Википедия — Бунин, Иван Алексеевич (раздел о матери)",
+   "url": "https://ru.wikipedia.org/wiki/Бунин,_Иван_Алексеевич"
+  },
+  {
+   "label": "Музей И. А. Бунина — «В силу любви… была она и воплощенной печалью»",
+   "url": "https://bunin.eletsmuseum.ru/v-silu-lyubvi-byla-ona-i-voploshhennoj-pechalyu/"
+  }
+ ],
+ "id": "lyudmila-aleksandrovna"
+}

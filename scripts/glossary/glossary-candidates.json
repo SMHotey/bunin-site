@@ -1,0 +1,478 @@
+[
+ {
+  "w": "выя",
+  "m": "шея",
+  "group": "arhaizmy",
+  "occ": 932,
+  "worksHit": 142
+ },
+ {
+  "w": "свет",
+  "m": "мир, вселенная (устар.)",
+  "group": "ushershie-znacheniya",
+  "occ": 460,
+  "worksHit": 196
+ },
+ {
+  "w": "око",
+  "m": "глаз",
+  "group": "arhaizmy",
+  "occ": 455,
+  "worksHit": 124
+ },
+ {
+  "w": "стол",
+  "m": "престол, трон",
+  "group": "ushershie-znacheniya",
+  "occ": 203,
+  "worksHit": 49
+ },
+ {
+  "w": "чело",
+  "m": "лоб",
+  "group": "arhaizmy",
+  "occ": 152,
+  "worksHit": 47
+ },
+ {
+  "w": "покой",
+  "m": "комната (устар.)",
+  "group": "ushershie-znacheniya",
+  "occ": 103,
+  "worksHit": 56
+ },
+ {
+  "w": "уста",
+  "m": "губы, рот",
+  "group": "arhaizmy",
+  "occ": 97,
+  "worksHit": 47
+ },
+ {
+  "w": "гость",
+  "m": "купец (устар.)",
+  "group": "ushershie-znacheniya",
+  "occ": 74,
+  "worksHit": 19
+ },
+ {
+  "w": "сень",
+  "m": "тень, укрытие (книжн.)",
+  "group": "arhaizmy",
+  "occ": 61,
+  "worksHit": 22
+ },
+ {
+  "w": "худой",
+  "m": "плохой (устар.)",
+  "group": "ushershie-znacheniya",
+  "occ": 59,
+  "worksHit": 27
+ },
+ {
+  "w": "мгла",
+  "m": "сумрак, тьма",
+  "group": "arhaizmy",
+  "occ": 42,
+  "worksHit": 30
+ },
+ {
+  "w": "становой",
+  "m": "становой пристав",
+  "group": "realyi",
+  "occ": 39,
+  "worksHit": 19
+ },
+ {
+  "w": "твердь",
+  "m": "небесный свод",
+  "group": "arhaizmy",
+  "occ": 37,
+  "worksHit": 22
+ },
+ {
+  "w": "внимать",
+  "m": "слушать, слышать",
+  "group": "arhaizmy",
+  "occ": 36,
+  "worksHit": 22
+ },
+ {
+  "w": "жито",
+  "m": "хлеб в зерне",
+  "group": "ushershie-znacheniya",
+  "occ": 33,
+  "worksHit": 19
+ },
+ {
+  "w": "лик",
+  "m": "лицо; сонм святых",
+  "group": "arhaizmy",
+  "occ": 29,
+  "worksHit": 28
+ },
+ {
+  "w": "поддёвка",
+  "m": "короткий кафтан со сборками",
+  "group": "realyi",
+  "occ": 28,
+  "worksHit": 4
+ },
+ {
+  "w": "притвор",
+  "m": "входная часть храма",
+  "group": "cerkovnoe",
+  "occ": 20,
+  "worksHit": 12
+ },
+ {
+  "w": "живот",
+  "m": "жизнь (устар.)",
+  "group": "ushershie-znacheniya",
+  "occ": 17,
+  "worksHit": 15
+ },
+ {
+  "w": "язык",
+  "m": "народ (устар.)",
+  "group": "ushershie-znacheniya",
+  "occ": 17,
+  "worksHit": 12
+ },
+ {
+  "w": "гумно",
+  "m": "место для молотьбы",
+  "group": "realyi",
+  "occ": 13,
+  "worksHit": 8
+ },
+ {
+  "w": "жнивьё",
+  "m": "поле после жатвы",
+  "group": "realyi",
+  "occ": 12,
+  "worksHit": 7
+ },
+ {
+  "w": "перси",
+  "m": "грудь",
+  "group": "arhaizmy",
+  "occ": 9,
+  "worksHit": 9
+ },
+ {
+  "w": "риза",
+  "m": "облачение; одежда",
+  "group": "arhaizmy",
+  "occ": 9,
+  "worksHit": 9
+ },
+ {
+  "w": "барчук",
+  "m": "барский сынок",
+  "group": "realyi",
+  "occ": 8,
+  "worksHit": 4
+ },
+ {
+  "w": "зипун",
+  "m": "крестьянский кафтан",
+  "group": "realyi",
+  "occ": 8,
+  "worksHit": 7
+ },
+ {
+  "w": "обедня",
+  "m": "дневная церковная служба",
+  "group": "cerkovnoe",
+  "occ": 8,
+  "worksHit": 5
+ },
+ {
+  "w": "паперть",
+  "m": "крыльцо церкви",
+  "group": "cerkovnoe",
+  "occ": 7,
+  "worksHit": 7
+ },
+ {
+  "w": "уезд",
+  "m": "административная единица",
+  "group": "realyi",
+  "occ": 7,
+  "worksHit": 6
+ },
+ {
+  "w": "чертог",
+  "m": "пышное помещение",
+  "group": "arhaizmy",
+  "occ": 7,
+  "worksHit": 6
+ },
+ {
+  "w": "ладан",
+  "m": "смола для каждения",
+  "group": "cerkovnoe",
+  "occ": 6,
+  "worksHit": 6
+ },
+ {
+  "w": "плетень",
+  "m": "плетёная изгородь",
+  "group": "realyi",
+  "occ": 6,
+  "worksHit": 3
+ },
+ {
+  "w": "покос",
+  "m": "луг для косьбы",
+  "group": "realyi",
+  "occ": 6,
+  "worksHit": 6
+ },
+ {
+  "w": "клеть",
+  "m": "холодная кладовая",
+  "group": "realyi",
+  "occ": 5,
+  "worksHit": 4
+ },
+ {
+  "w": "озимь",
+  "m": "осенние посевы",
+  "group": "realyi",
+  "occ": 5,
+  "worksHit": 3
+ },
+ {
+  "w": "перст",
+  "m": "палец",
+  "group": "arhaizmy",
+  "occ": 5,
+  "worksHit": 5
+ },
+ {
+  "w": "армяк",
+  "m": "мужская верхняя одежда из сукна",
+  "group": "realyi",
+  "occ": 4,
+  "worksHit": 3
+ },
+ {
+  "w": "молебен",
+  "m": "краткое богослужение",
+  "group": "cerkovnoe",
+  "occ": 4,
+  "worksHit": 3
+ },
+ {
+  "w": "ток",
+  "m": "расчищенная площадка для молотьбы",
+  "group": "realyi",
+  "occ": 4,
+  "worksHit": 3
+ },
+ {
+  "w": "алкать",
+  "m": "сильно желать",
+  "group": "arhaizmy",
+  "occ": 3,
+  "worksHit": 3
+ },
+ {
+  "w": "клирос",
+  "m": "место певчих в церкви",
+  "group": "cerkovnoe",
+  "occ": 3,
+  "worksHit": 3
+ },
+ {
+  "w": "ланиты",
+  "m": "щёки",
+  "group": "arhaizmy",
+  "occ": 3,
+  "worksHit": 2
+ },
+ {
+  "w": "аналой",
+  "m": "подставка для икон и книг",
+  "group": "cerkovnoe",
+  "occ": 2,
+  "worksHit": 2
+ },
+ {
+  "w": "десница",
+  "m": "правая рука",
+  "group": "arhaizmy",
+  "occ": 2,
+  "worksHit": 2
+ },
+ {
+  "w": "курень",
+  "m": "казачья изба",
+  "group": "realyi",
+  "occ": 2,
+  "worksHit": 1
+ },
+ {
+  "w": "куща",
+  "m": "шатёр, кров",
+  "group": "arhaizmy",
+  "occ": 2,
+  "worksHit": 2
+ },
+ {
+  "w": "стезя",
+  "m": "путь",
+  "group": "arhaizmy",
+  "occ": 2,
+  "worksHit": 2
+ },
+ {
+  "w": "стопа",
+  "m": "нога (книжн.)",
+  "group": "arhaizmy",
+  "occ": 2,
+  "worksHit": 2
+ },
+ {
+  "w": "вежды",
+  "m": "веки",
+  "group": "arhaizmy",
+  "occ": 1,
+  "worksHit": 1
+ },
+ {
+  "w": "всенощная",
+  "m": "вечерняя служба",
+  "group": "cerkovnoe",
+  "occ": 1,
+  "worksHit": 1
+ },
+ {
+  "w": "длань",
+  "m": "рука, ладонь (книжн.)",
+  "group": "arhaizmy",
+  "occ": 1,
+  "worksHit": 1
+ },
+ {
+  "w": "зеница",
+  "m": "зрачок, глаз",
+  "group": "arhaizmy",
+  "occ": 1,
+  "worksHit": 1
+ },
+ {
+  "w": "негодяй",
+  "m": "негодный к службе (устар.)",
+  "group": "ushershie-znacheniya",
+  "occ": 1,
+  "worksHit": 1
+ },
+ {
+  "w": "позор",
+  "m": "зрелище (устар.)",
+  "group": "ushershie-znacheniya",
+  "occ": 1,
+  "worksHit": 1
+ },
+ {
+  "w": "ухват",
+  "m": "рогач для чугунов",
+  "group": "realyi",
+  "occ": 1,
+  "worksHit": 1
+ },
+ {
+  "w": "волость",
+  "m": "сельский округ",
+  "group": "realyi",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "довлеть",
+  "m": "быть достаточным; тяготеть",
+  "group": "ushershie-znacheniya",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "исправник",
+  "m": "уездный полицейский начальник",
+  "group": "realyi",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "канун",
+  "m": "день перед праздником",
+  "group": "cerkovnoe",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "одонье",
+  "m": "скирда хлеба",
+  "group": "realyi",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "околица",
+  "m": "объездная дорога у села",
+  "group": "realyi",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "полати",
+  "m": "настил для сна под потолком",
+  "group": "realyi",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "просфора",
+  "m": "хлебец для причастия",
+  "group": "cerkovnoe",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "рамена",
+  "m": "плечи",
+  "group": "arhaizmy",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "скиния",
+  "m": "шатёр; обитель",
+  "group": "arhaizmy",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "стерня",
+  "m": "сжатое поле",
+  "group": "realyi",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "хлябь",
+  "m": "бездна, пучина",
+  "group": "arhaizmy",
+  "occ": 0,
+  "worksHit": 0
+ },
+ {
+  "w": "шуйца",
+  "m": "левая рука",
+  "group": "arhaizmy",
+  "occ": 0,
+  "worksHit": 0
+ }
+]

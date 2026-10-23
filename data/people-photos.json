@@ -1,0 +1,152 @@
+{
+ "aleksey-nikolaevich": {
+  "photo": "/img/people/aleksey-nikolaevich.jpg",
+  "photoAlt": "Алексей Николаевич Бунин, отец писателя",
+  "photoCredit": "Фото: Unknown author, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:%D0%91%D1%83%D0%BD%D0%B8%D0%BD,_%D0%90%D0%BB%D0%B5%D0%BA%D1%81%D0%B5%D0%B9_%D0%9D%D0%B8%D0%BA%D0%BE%D0%BB%D0%B0%D0%B5%D0%B2%D0%B8%D1%87.jpg",
+  "photoW": 347,
+  "photoH": 494,
+  "caption": "Алексей Николаевич Бунин (1827—1906), помещик, участник Крымской войны, отец Ивана Бунина. Портрет по фотографии до 1907 года."
+ },
+ "nikolai-bunin": {
+  "photo": "/img/people/nikolai-bunin.jpg",
+  "photoAlt": "Николай Бунин, сын писателя",
+  "photoCredit": "Фото: Unknown author, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:%D0%9C%D0%B8%D0%BA%D0%BE%D0%BB%D0%B0_%D0%A1%D0%B8%D0%BD_%D0%93%D0%B0%D0%BD%D0%BD%D0%B8_%D0%A6%D0%B0%D0%BA%D0%BD%D1%96_%D1%82%D0%B0_%D0%86%D0%B2%D0%B0%D0%BD%D0%B0_%D0%91%D1%83%D0%BD%D1%96%D0%BD%D0%B0.jpg",
+  "photoW": 300,
+  "photoH": 458,
+  "caption": "Николай Бунин — единственный сын писателя и Анны Цакни, умер от скарлатины в 1905 году."
+ },
+ "vera-murmtseva": {
+  "photo": "/img/people/vera-murmtseva.jpg",
+  "photoAlt": "Вера Николаевна Муромцева-Бунина, профиль",
+  "photoCredit": "Фото: Unknown author, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:Muromceva_i_Bunin.jpg",
+  "photoW": 172,
+  "photoH": 280,
+  "caption": "Вера Николаевна Муромцева-Бунина (1881—1961), жена писателя с 1906 года. Фрагмент парного портрета с Иваном Буниным, 1910-е годы."
+ },
+ "khodasevich": {
+  "photo": "/img/people/khodasevich.jpg",
+  "photoAlt": "Владислав Ходасевич, Париж, 1920-е годы",
+  "photoCredit": "Фото: Pierre Choumoff, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:Khodasevich_Choumoff.jpg",
+  "photoW": 670,
+  "photoH": 900,
+  "caption": "Владислав Фелицианович Ходасевич (1886—1939). Фотография Пьера Шумова, Париж, 1920-е — начало 1930-х годов."
+ },
+ "brusov": {
+  "photo": "/img/people/brusov.jpg",
+  "photoAlt": "Валерий Брюсов, около 1900 года",
+  "photoCredit": "Фото: Unknown author, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:Valery_Bryusov_c._1900.jpg",
+  "photoW": 628,
+  "photoH": 900,
+  "caption": "Валерий Яковлевич Брюсов (1873—1924). Портретная фотография около 1900 года, ещё до знакомства с Буниным."
+ },
+ "stanislavsky": {
+  "photo": "/img/people/stanislavsky.jpg",
+  "photoAlt": "Константин Станиславский",
+  "photoCredit": "Фото: Unknown author, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:Constantin_Stanislavski.jpg",
+  "photoW": 659,
+  "photoH": 900,
+  "caption": "Константин Сергеевич Станиславский (1863—1938), реформатор театра. Портретная фотография начала XX века."
+ },
+ "anna-tsakni": {
+  "photo": "/img/people/anna-tsakni.jpg",
+  "photoAlt": "Анна Николаевна Цакни",
+  "photoCredit": "Фото: Unknown, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File%3A%D0%93%D0%B0%D0%BD%D0%BD%D0%B0_%D0%A6%D0%B0%D0%BA%D0%BD%D1%96%2C_23_%D0%B2%D0%B5%D1%80%D0%B5%D1%81%D0%BD%D1%8F_1898_%D1%80%D0%BE%D0%BA%D1%83%2C_%D0%9E%D0%B4%D0%B5%D1%81%D0%B0.jpg",
+  "photoW": 600,
+  "photoH": 800
+ },
+ "aldanov": {
+  "photo": "/img/people/aldanov.jpg",
+  "photoAlt": "Марк Алданов, 1925 год",
+  "photoCredit": "Фото: Unknown author, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:Aldanov.jpg",
+  "photoW": 189,
+  "photoH": 282
+ },
+ "yuliy-alekseevich": {
+  "photo": "/img/people/yuliy-alekseevich.jpg",
+  "photoAlt": "Бунин Ю.А.",
+  "photoCredit": "Фото: Unknown authorUnknown author, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File%3A%D0%91%D1%83%D0%BD%D0%B8%D0%BD_%D0%AE.%D0%90.png",
+  "photoW": 326,
+  "photoH": 484
+ },
+ "chekhov": {
+  "photo": "/img/people/chekhov.jpg",
+  "photoAlt": "Anton Chekhov 1889",
+  "photoCredit": "Фото: unknown; derivative work by Brücke-Osteuropa, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File%3AAnton-Chekov_1889.JPG",
+  "photoW": 589,
+  "photoH": 900
+ },
+ "gorky": {
+  "photo": "/img/people/gorky.jpg",
+  "photoAlt": "Maxim Gorky by N.A. Andreev",
+  "photoCredit": "Фото: Unknown author, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File%3AChaliapin_F._%28%D0%A8%D0%B0%D0%BB%D1%8F%D0%BF%D0%B8%D0%BD_%D0%A4._%D0%98.%29_1902_with_group.jpg",
+  "photoW": 900,
+  "photoH": 635
+ },
+ "kuprin": {
+  "photo": "/img/people/kuprin.jpg",
+  "photoAlt": "Kuprin AV",
+  "photoCredit": "Фото: A. F. Marks, 1912, Wikimedia Commons, Public domain",
+  "photoLicense": "CC0",
+  "photoSource": "https://commons.wikimedia.org/wiki/File%3AAlexander_Kuprin_1880-1960_The_Kremlin_1918_Watercolor_Size_44_%D1%85_39_cm.jpg",
+  "photoW": 793,
+  "photoH": 900
+ },
+ "teleshov": {
+  "photo": "/img/people/teleshov.jpg",
+  "photoAlt": "Teleshov",
+  "photoCredit": "Фото: Unknown author, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File%3AGRW559_Teleshov.jpg",
+  "photoW": 657,
+  "photoH": 900
+ },
+ "zaytsev": {
+  "photo": "/img/people/zaytsev.jpg",
+  "photoAlt": "Борис Зайцев (cropped)",
+  "photoCredit": "Фото: Pierre Choumoff, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File%3A%D0%91%D0%BE%D1%80%D0%B8%D1%81_%D0%97%D0%B0%D0%B9%D1%86%D0%B5%D0%B2.jpg",
+  "photoW": 649,
+  "photoH": 900
+ },
+ "shmelev": {
+  "photo": "/img/people/shmelev.jpg",
+  "photoAlt": "Ivan Shmelev writer",
+  "photoCredit": "Фото: Unknown author, Wikimedia Commons, Public domain (РГАЛИ, ф. 1198)",
+  "photoLicense": "CC BY-SA 4.0",
+  "photoSource": "https://commons.wikimedia.org/wiki/File%3A%D0%98.%D0%A1._%D0%A8%D0%BC%D0%B5%D0%BB%D1%91%D0%B2%D1%83.jpg",
+  "photoW": 507,
+  "photoH": 900
+ },
+ "teffi": {
+  "photo": "/img/people/teffi.jpg",
+  "photoAlt": "Teffi portrait",
+  "photoCredit": "Фото: Unknown author, Wikimedia Commons, Public domain",
+  "photoLicense": "Public domain",
+  "photoSource": "https://commons.wikimedia.org/wiki/File%3ARecueil._Portraits_de_Nadejda_Alexandrovna_-_btv1b85292663.jpg",
+  "photoW": 646,
+  "photoH": 900
+ }
+}

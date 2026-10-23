@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Дашборд-лендинг о Иване Бунине: биография, люди, библиотека произведений, научные работы",
+  "description": "Сайт об Иване Бунине: биография, люди, библиотека произведений, книги и научные работы",
   "scripts": {
     "import:genres": "node scripts/import-genres.mjs",
     "import:works": "node scripts/import-works.mjs",

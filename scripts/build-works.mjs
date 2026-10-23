@@ -21,6 +21,17 @@ const cache = JSON.parse(await readFile(CACHE, 'utf8'));
 const genreMap = existsSync('data/genre-map.json')
   ? JSON.parse(await readFile('data/genre-map.json', 'utf8')) : {};
 
+// Импорт Викитеки ставил жанр по разделу страницы автора и путал прозу со стихами
+// (35 рассказов лежали как «Стихотворение»). Определяем по фактуре текста: у прозы
+// средняя длина строки больше 12 слов, у стихов — меньше 8; в корпусе разрыв чистый.
+function detectGenre(title, text) {
+  if (genreMap[title]) return genreMap[title];
+  const lines = text.split('\n').map((s) => s.trim()).filter(Boolean);
+  const lens = lines.map((l) => l.split(/\s+/).length);
+  const avg = lens.reduce((a, b) => a + b, 0) / (lens.length || 1);
+  return avg > 12 ? 'Рассказ' : 'Стихотворение';
+}
+
 const works = [];
 for (const [title, raw] of Object.entries(cache)) {
   const text = cleanWiki(raw);
@@ -29,7 +40,7 @@ for (const [title, raw] of Object.entries(cache)) {
   works.push({
     title: name,
     slug: slugify(name),
-    genre: genreMap[title] || 'Стихотворение',
+    genre: detectGenre(title, text),
     year: yearFrom(raw),
     published: (raw.match(/\|\s*ДАТАПУБЛИКАЦИИ\s*=\s*([^\n]*)/i) || [])[1] || null,
     text,

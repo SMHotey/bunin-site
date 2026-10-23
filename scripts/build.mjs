@@ -50,7 +50,8 @@ const SITE = String(config.siteUrl || 'https://example.org').replace(/\/$/, '');
 const TEXTS_PD = config.textsPublicDomain !== false;
 const LANG = config.lang || 'ru';
 const UPDATED = config.updated || new Date().toISOString().slice(0, 10);
-const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'ноября'];
+const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+const MONTHS_NOM = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
 
 function formatDate(iso) {
   const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -95,6 +96,7 @@ const topics = await readJson('data/topics.json', []);
 const glossary = await readJson('data/glossary.json', { groups: [] });
 const faq = await readJson('data/faq.json', []);
 const death = await readJson('data/death.json', { blocks: [] });
+const dossiers = await readJson('data/dossiers.json', {});
 
 const categories = Object.keys(config.peopleCategories || {}).length
   ? config.peopleCategories
@@ -354,7 +356,7 @@ ${content}
         <ul>
           <li><a href="/topics/">Стихи по темам</a></li>
           <li><a href="/works/az.html">Алфавитный указатель</a></li>
-          <li><a href="/glossary.html">Словарь к стихам</a></li>
+          <li><a href="/glossary.html">Словарь к стихам и прозе</a></li>
           <li><a href="/faq.html">Частые вопросы</a></li>
           <li><a href="/research/">Научные работы</a></li>
           <li><a href="/legacy/memory.html">Музеи и памятники</a></li>
@@ -826,8 +828,52 @@ function categoryPage(key) {
   <div class="wrap" style="padding-bottom:50px"><div class="people-grid">${list.map(personCard).join('')}</div></div>`;
 }
 
+// Даты в досье хранятся машинно (1915-03-09, 1922-05), а читателю нужен обычный вид.
+function fmtDossierDate(value) {
+  const s = String(value || '').trim();
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return `${Number(m[3])} ${MONTHS[Number(m[2]) - 1]} ${m[1]}`;
+  m = s.match(/^(\d{4})-(\d{2})$/);
+  if (m) return `${MONTHS_NOM[Number(m[2]) - 1]} ${m[1]}`;
+  return s;
+}
+
+function dossierHtml(id) {
+  const d = dossiers[id];
+  if (!d) return '';
+  const order = [];
+  const index = new Map();
+  const facts = (d.facts || []).map((f) => `<li>${esc(f.claim)}</li>`).join('');
+  const rels = (d.relations || []).map((r) => `<li><b>${esc(fmtDossierDate(r.date))}</b> — ${esc(r.event)}</li>`).join('');
+  const unknown = (d.unknown || []).map((u) => `<li>${esc(u)}</li>`).join('');
+  for (const s of d.sources || []) { if (s.url && !index.has(s.url)) { order.push(s.url); index.set(s.url, order.length); } }
+  const labels = new Map((d.sources || []).map((s) => [s.url, s.label]));
+  const srcList = order.map((u) => `<li><a href="${esc(u)}" rel="noopener external" target="_blank">${esc(labels.get(u) || u)}</a></li>`).join('');
+  if (!facts && !rels && !srcList) return '';
+  return `<div class="dossier">
+      ${facts ? `<h2 class="dossier-h">Что известно по документам</h2><ul class="dossier-list">${facts}</ul>` : ''}
+      ${rels ? `<h2 class="dossier-h">Хронология отношений</h2><ol class="dossier-list dossier-time">${rels}</ol>` : ''}
+      ${unknown ? `<h2 class="dossier-h">Чего мы не знаем</h2><ul class="dossier-list">${unknown}</ul>` : ''}
+      ${srcList ? `<div class="source-box"><b>Источники к досье.</b><ul class="dossier-src">${srcList}</ul></div>` : ''}
+    </div>`;
+}
+
+// Упоминания считаем по точным формам имени из p.aliases: поиск по первому слову
+// («Иван») находил бы героев рассказов, а не самого человека.
+const normedTexts = new Map(works.map((w) => [w, norm(w.text)]));
+function mentionsOf(p) {
+  const forms = [String(p.name || ''), ...(p.aliases || [])].map(norm).filter((s) => s.length > 3);
+  if (!forms.length) return [];
+  return works.filter((w) => {
+    const t = normedTexts.get(w);
+    return forms.some((f) => t.includes(f));
+  });
+}
+
 function personPage(p) {
-  const related = works.filter((w) => norm(w.text).includes(norm(String(p.name || '').split(' ')[0]))).slice(0, 6);
+  const all = mentionsOf(p);
+  const related = all.slice(0, 8);
+  const yearsMentioned = [...new Set(all.map((w) => w.year).filter(Boolean))].sort();
   const rel = people.filter((x) => x.category === p.category && x.id !== p.id).slice(0, 6);
   return `${crumbs([['/', 'Главная'], ['/people/', 'Люди'], [`/people/${p.category}.html`, categories[p.category] || 'Люди'], [null, p.name]])}
   <div class="wrap">
@@ -839,6 +885,7 @@ function personPage(p) {
         <p style="font-family:var(--serif);font-size:19px;color:var(--ink-soft);max-width:62ch">${esc(p.summary)}</p>
       </div>
     </div>
+    ${dossierHtml(p.id)}
     <div class="grid-2" style="padding-bottom:40px">
       <div class="panel">
         <h3>Связи</h3>
@@ -847,7 +894,10 @@ function personPage(p) {
       </div>
       <div class="panel">
         <h3>В произведениях</h3>
-        ${related.length ? `<div class="people-chips">${related.map((w) => `<a class="chip" href="${workUrl(w)}">${esc(w.title)}</a>`).join('')}</div>` : '<p style="color:var(--muted);font-size:14px">Прямых упоминаний в текстах библиотеки не найдено.</p>'}
+        ${related.length
+          ? `<p style="font-size:14px;color:var(--ink-soft);margin-bottom:12px">Упоминается в ${all.length} ${plural(all.length, ['произведении', 'произведениях', 'произведениях'])} библиотеки${yearsMentioned.length > 1 ? `, ${yearsMentioned[0]}–${yearsMentioned[yearsMentioned.length - 1]}` : yearsMentioned.length === 1 ? `, ${yearsMentioned[0]}` : ''}.</p>
+        <div class="people-chips">${related.map((w) => `<a class="chip" href="${workUrl(w)}">${esc(w.title)}</a>`).join('')}</div>`
+          : '<p style="color:var(--muted);font-size:14px">Прямых упоминаний по имени в текстах библиотеки не найдено: связь известна по письмам и мемуарам, но в самих произведениях имя не встречается.</p>'}
       </div>
     </div>
     <div class="source-box" style="margin-bottom:60px"><b>Источник.</b> Биографические сведения сверены с энциклопедическими и академическими изданиями; см. <a href="/sources.html">реестр источников</a>. Даты жизни уточняются по мере поступления новых данных.</div>
@@ -922,7 +972,7 @@ ${crumbs([['/', 'Главная'], [null, 'Библиотека']])}
     <a class="chip" href="/topics/">Стихи по темам</a>
     <a class="chip" href="/works/az.html">Алфавитный указатель</a>
     <a class="chip" href="/print/">Для печати</a>
-    <a class="chip" href="/glossary.html">Словарь к стихам</a>
+    <a class="chip" href="/glossary.html">Словарь к стихам и прозе</a>
     <a class="chip" href="/legacy/music.html">Песни и романсы</a>
   </div>
 </div>
@@ -1009,7 +1059,7 @@ function workPage(w, index) {
       ${(workTopics.get(w.slug) || []).length ? `<span style="font-size:13px;color:var(--muted);align-self:center">Темы:</span>
       ${(workTopics.get(w.slug) || []).map((t) => `<a class="chip" href="/topics/${t.id}.html">${esc(t.kicker || t.title)}</a>`).join('')}` : ''}
       <a class="chip" href="/works/az.html">Алфавитный указатель</a>
-      <a class="chip" href="/glossary.html">Словарь к стихам</a>
+      <a class="chip" href="/glossary.html">Словарь к стихам и прозе</a>
       <a class="chip" href="/topics/">Все подборки</a>
     </div>
     <nav style="display:flex;justify-content:space-between;gap:16px;margin-top:30px" aria-label="Навигация по произведениям">
@@ -1139,10 +1189,13 @@ ${crumbs([['/', 'Главная'], [null, 'О проекте']])}
     <p>Это некоммерческий просветительский проект, посвящённый ${esc(A.fullName)}. Его задача — собрать в одном месте проверенную биографию, людей вокруг ${esc(A.roleGenitive)}, полную библиотеку текстов, книжные издания и научную литературу.</p>
     <h2>Принципы работы с фактами</h2>
     <p>Каждое утверждение опирается на источник. При расхождении источников мы показываем версии, а не выбираем удобную. Спорные сюжеты вынесены в раздел «Версии».</p>
+    <h2>Досье людей</h2>
+    <p>На странице каждого человека есть досье: что известно по документам, хронология отношений с ${esc(A.name)}, отдельный список «Чего мы не знаем» и источники. Формат досье устроен так, что утверждение без ссылки на источник в него просто не попадает — сборка останавливается с ошибкой. Поэтому досье — это не пересказ энциклопедической статьи, а рабочий аппарат: по каждой строке можно перейти к первоисточнику и проверить её самому.</p>
+    <p>Блок «Чего мы не знаем» важен не меньше остальных: в биографии ${esc(A.genitive)} много мест, где источники дают только годы без дат, расходятся в деталях или молчат. Мы предпочитаем показывать такую лакуну, чем закрывать её правдоподобной догадкой.</p>
     <h2>Тексты</h2>
     <p>${esc(A.copyright)} ${TEXTS_PD ? 'Произведения находятся в общественном достоянии; у каждого указана страница-источник и, где возможно, редакция академического издания.' : 'Полные тексты произведений не размещаются, пока действует авторское право: доступны метаданные и ссылки на правомерные издания.'}</p>
     <h2>Разделы о местах, музыке, кино и языке</h2>
-    <p>Тексты разделов «Бунинские места», «Наследие», «Стихи по темам», «Словарь к стихам» и «Частые вопросы» написаны для этого проекта. Они опираются на общедоступные факты — даты, названия, адреса, библиографические сведения — и не воспроизводят чужие статьи, очерки или музейные описания. Факт как таковой не является объектом авторского права; авторским правом охраняется форма изложения, писателему все объяснения, связки и оценки в этих разделах — оригинальные.</p>
+    <p>Тексты разделов «Бунинские места», «Наследие», «Стихи по темам», «Словарь к стихам и прозе» и «Частые вопросы» написаны для этого проекта. Они опираются на общедоступные факты — даты, названия, адреса, библиографические сведения — и не воспроизводят чужие статьи, очерки или музейные описания. Факт как таковой не является объектом авторского права; авторским правом охраняется форма изложения, а все объяснения, связки и оценки в этих разделах — оригинальные.</p>
     <p>Стихотворные строки в словаре и подборках приведены из произведений ${esc(A.genitive)}, находящихся в общественном достоянии. Библиографические описания книг и статей даны в информационных целях.</p>
     <h2>Изображения</h2>
     <p>Используются только файлы из Wikimedia Commons, находящиеся в общественном достоянии или под свободной лицензией. Атрибуция указана рядом с изображением.</p>
@@ -1431,8 +1484,14 @@ await writePage('works/index.html', layout({
   breadcrumb: [['/', 'Главная'], [null, 'Библиотека']],
 }));
 
+// Одноимённые книги (например, два «Избранных» разных лет) дают одинаковый title,
+// и verify справедливо ругается на дубли. Различаем их годом издания.
+const titleCount = new Map();
+for (const w of works) titleCount.set(w.title, (titleCount.get(w.title) || 0) + 1);
+
 for (let i = 0; i < works.length; i++) {
   const w = works[i];
+  const displayTitle = titleCount.get(w.title) > 1 ? `${w.title} (${w.year || 'без года'})` : w.title;
   const ld = {
     '@type': 'CreativeWork',
     '@id': `${SITE}${workUrl(w)}#work`,
@@ -1449,12 +1508,17 @@ for (let i = 0; i < works.length; i++) {
     title: (() => {
       // Полное название + жанр + «текст» — ради CTR в выдаче, но не длиннее 88 символов.
       // «Читать и распечатать» — частый поисковый сценарий: такую формулировку ищут.
+      // layout добавляет « — Имя Фамилия», если имени нет в title: бюджет считаем
+      // без этого хвоста, иначе title вылезает за 88 (у Ахматовой — до 101 знака).
+      const budget = 88 - ` — ${A.name}`.length;
       const suffix = ` — ${String(w.genre || 'текст').toLowerCase()} ${A.genitive}: читать, распечатать`;
-      const quoted = `«${w.title}»`;
-      if ((quoted + suffix).length <= 88) return quoted + suffix;
-      const plain = `${w.title} — ${A.name}: читать, распечатать`;
-      if (plain.length <= 88) return plain;
-      return `${w.title.slice(0, Math.max(40, 88 - A.name.length - 21)).trim()}… — ${A.name}: читать, распечатать`;
+      const quoted = `«${displayTitle}»`;
+      if ((quoted + suffix).length <= budget) return quoted + suffix;
+      const plain = `${displayTitle}: читать, распечатать`;
+      if (plain.length <= budget) return plain;
+      const tail = `…: читать, распечатать`;
+      const room = Math.max(24, budget - tail.length);
+      return `${w.title.slice(0, room).trim()}${tail}`;
     })(),
     description: `«${w.title}» — ${String(w.genre || '').toLowerCase()} ${A.genitive}${w.year ? ', ' + w.year : ''}. ${firstLine(w.text).slice(0, 100)} Полный текст онлайн, версия для печати на A4 — без регистрации.`,
     content: workPage(w, i), active: 'works', ogType: 'article', jsonLd: ld,

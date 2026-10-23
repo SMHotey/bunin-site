@@ -13,6 +13,9 @@ const warnings = [];
 const info = [];
 
 const readJson = async (p) => {
+  // Новый сайт начинается с пустых данных: отсутствие файла — это «пока нет»,
+  // а не ошибка сборки. Иначе verify падает на первой же проверке книг.
+  if (!existsSync(p)) return [];
   const raw = (await readFile(p, 'utf8')).trim();
   // Пустой файл данных — «пока нет», раздел показывает заглушку (см. build.mjs).
   return raw ? JSON.parse(raw) : [];
@@ -42,6 +45,48 @@ function distPathFor(urlPath) {
 const files = await walk(DIST);
 const htmlFiles = files.filter((f) => extname(f) === '.html');
 const titles = new Map();
+
+// Фотографии персон: файл на месте, лицензия свободная, подпись и ссылка на файл есть.
+// Фото без атрибуции — юридический и репутационный риск для просветительского сайта.
+const peopleData = await readJson('data/people.json', []);
+let photos = 0;
+for (const person of peopleData) {
+  if (!person.photo) continue;
+  photos += 1;
+  const rel = String(person.photo).replace(/^\//, '');
+  if (!existsSync(join(DIST, rel))) errors.push(`фото персоны ${person.id}: нет файла ${person.photo}`);
+  if (!/\.(jpe?g|png|webp)$/i.test(person.photo)) errors.push(`фото персоны ${person.id}: неожиданный формат ${person.photo}`);
+  if (!person.photoAlt) errors.push(`фото персоны ${person.id}: нет alt`);
+  if (!person.photoCredit) errors.push(`фото персоны ${person.id}: нет подписи об источнике`);
+  if (!/pd|public domain|cc0/i.test(String(person.photoLicense || ''))) errors.push(`фото персоны ${person.id}: лицензия «${person.photoLicense || 'нет'}» — нужна свободная`);
+  if (!person.photoSource) errors.push(`фото персоны ${person.id}: нет ссылки на страницу файла`);
+}
+if (photos) info.push(`фото персон: ${photos} из ${peopleData.length}`);
+
+// Досье персон: каждое утверждение должно нести ссылку на источник.
+// Досье без ссылок хуже, чем его отсутствие: оно выглядит как проверенный факт.
+if (existsSync('data/dossiers.json')) {
+  const dossiers = await readJson('data/dossiers.json');
+  const people = existsSync('data/people.json') ? await readJson('data/people.json') : [];
+  const ids = new Set((Array.isArray(people) ? people : []).map((x) => x.id));
+  const isUrl = (u) => /^https?:\/\/[^\s]+\.[^\s]+/.test(String(u || ''));
+  for (const [id, d] of Object.entries(dossiers || {})) {
+    if (!ids.has(id)) errors.push(`досье: нет персоны с id «${id}»`);
+    for (const [i, f] of (d.facts || []).entries()) {
+      if (!String(f.claim || '').trim()) errors.push(`досье ${id}: факт ${i + 1} без текста`);
+      if (!isUrl(f.source)) errors.push(`досье ${id}: факт ${i + 1} без ссылки на источник`);
+    }
+    for (const [i, r] of (d.relations || []).entries()) {
+      if (!String(r.date || '').trim() || !String(r.event || '').trim()) errors.push(`досье ${id}: запись ${i + 1} без даты или события`);
+      if (!isUrl(r.source)) errors.push(`досье ${id}: запись ${i + 1} без ссылки на источник`);
+    }
+    for (const s of d.sources || []) {
+      if (!isUrl(s.url)) errors.push(`досье ${id}: источник «${s.label || '?'}» с битым адресом`);
+    }
+    if ((d.facts || []).length < 4) warnings.push(`досье ${id}: мало фактов (${(d.facts || []).length}) — возможно, недособрано`);
+  }
+  info.push(`досье: ${Object.keys(dossiers || {}).length} персон`);
+}
 
 for (const file of htmlFiles) {
   const rel = file.replace(/\\/g, '/').replace(/^dist\//, '');
@@ -84,6 +129,11 @@ for (const file of htmlFiles) {
   for (const [, body] of ld) {
     try { JSON.parse(body); } catch (e) { errors.push(`${rel}: битый JSON-LD (${e.message})`); }
   }
+
+  // Экранированный HTML-тег в отрендеренной странице = сырой тег в markdown или данных:
+  // генератор прогоняет текст через esc(), и читатель видит «<a href=…>» обычным текстом.
+  const escTag = html.match(/&lt;\/?[a-zA-Z][a-zA-Z0-9]*(?:[^&]|&(?!gt;))*?(?:&gt;|&nbsp;|\s|$)/);
+  if (escTag) errors.push(`${rel}: на странице виден экранированный HTML «${escTag[0].slice(0, 60)}» — в источнике сырой тег`);
 
   // внутренние ссылки
   for (const [, href] of html.matchAll(/(?:href|src)="(\/[^"#?]*)/g)) {
@@ -134,6 +184,17 @@ if (existsSync(pubDir)) {
     const date = raw.match(/^date:\s*(\S+)\s*$/m)?.[1]?.trim();
     if (!title) errors.push(`публикация ${f}: нет title`);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) errors.push(`публикация ${f}: нет даты YYYY-MM-DD`);
+    // Сырой HTML в markdown: генератор экранирует теги (esc в inline), и читатель
+    // увидит их на странице текстом — «<a href=…>Библиотека</a>». Ссылка = [текст](/путь/).
+    const pubBody = raw.replace(/^---\n[\s\S]*?\n---\n/, '');
+    if (/<\/?[a-zA-Z][^>]*>/.test(pubBody)) {
+      errors.push(`публикация ${f}: в тексте сырой HTML — ссылки пишутся как [текст](/путь/), теги не нужны`);
+    }
+    // Разработчицкие детали (пути скриптов, npm-команды, JSON-файлы данных) в тексте
+    // для читателя — признак недописанной редакционной правки.
+    if (/\b(?:scripts\/[\w./-]+|npm run [\w:.-]+|reports\/[\w./-]+|data\/[\w-]+\.json|[\w-]+\.mjs)\b/.test(raw)) {
+      errors.push(`публикация ${f}: разработчицкие пути/команды (scripts/, npm run, reports/, data/) в тексте для читателя`);
+    }
     const page = join(DIST, 'publications', `${slug}.html`);
     const isFuture = /^\d{4}-\d{2}-\d{2}$/.test(date || '') && date > today;
     if (!isFuture) {
@@ -205,6 +266,18 @@ for (const b of books) {
     }
   }
 }
+
+// --- тексты произведений ---
+// Импорт с Викитеки оставлял <ref> в параметрах шаблонов, «== 1 ==» и __NOTOC__ —
+// на странице это мусор. Гейт, чтобы чистка не откатилась при следующем импорте.
+const worksData = await readJson('data/works.json');
+for (const w of worksData) {
+  const t = String(w.text || '');
+  if (/<\/?[a-zA-Z][^>]*>/.test(t)) errors.push(`works.json: ${w.slug} — сырые HTML-теги в тексте произведения`);
+  if (/(?:^|\n)__\w+__/.test(t)) errors.push(`works.json: ${w.slug} — wiki-хелперы (__NOTOC__) в тексте`);
+  if (/(?:^|\n)==+[^=\n]+==+\s*(?:\n|$)/.test(t)) errors.push(`works.json: ${w.slug} — wiki-заголовки «== … ==» в тексте`);
+}
+if (worksData.length) info.push(`произведений проверено: ${worksData.length}`);
 
 // --- служебные файлы ---
 for (const f of ['404.html', 'robots.txt', 'sitemap.xml', 'search.json', '_headers', '_redirects', '.nojekyll', 'favicon.svg', 'styles.css', 'app.js']) {

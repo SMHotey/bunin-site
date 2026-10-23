@@ -101,7 +101,9 @@ export function buildSectionPages(ctx) {
       ${list.map(({ w }) => `<li>
         <a href="${workUrl(w)}">${esc(w.title)}</a>
         <span class="tw-year">${w.year ? esc(w.year) : 'дата не установлена'}</span>
-        <span class="tw-first">${esc((w.text || '').split('\\n').find((l) => l.trim()) || '')}</span>
+        ${w.genre === 'Стихотворение' && topicIsShort(w.text)
+          ? `<div class="tw-text">${esc(topicFullText(w.text))}</div>`
+          : `<span class="tw-first">${esc(topicFirstLine(w.text))}</span>`}
       </li>`).join('')}
     </ul>
     <div class="source-box"><b>Принцип отбора.</b> В подборку входят тексты, где тема подтверждается ключевыми образами и словарём. Это редакционный список, а не академическая классификация.
@@ -114,7 +116,7 @@ export function buildSectionPages(ctx) {
       <h4 style="margin-top:18px">Связанное</h4>
       <ul>
         <li><a href="/works/">Библиотека</a></li>
-        <li><a href="/glossary.html">Словарь к стихам</a></li>
+        <li><a href="/glossary.html">Словарь к стихам и прозе</a></li>
         <li><a href="/life/timeline.html">Хронология</a></li>
         <li><a href="/faq.html">Частые вопросы</a></li>
       </ul>
@@ -260,7 +262,7 @@ export function buildSectionPages(ctx) {
       <ul>
         <li><a href="/versions.html">Версии и спорные вопросы</a></li>
         <li><a href="/people/">Люди вокруг писателя</a></li>
-        <li><a href="/places/paris.html">Париж</a></li>
+        ${places.some((p) => p.id === 'paris') ? '<li><a href="/places/paris.html">Париж</a></li>' : ''}
         <li><a href="/research/">Научные работы</a></li>
         <li><a href="/faq.html">Частые вопросы</a></li>
       </ul>
@@ -407,7 +409,7 @@ export function buildSectionPages(ctx) {
       <ul>
         <li><a href="/research/">Научные работы</a></li>
         <li><a href="/legacy/music.html">Бунин в музыке</a></li>
-        <li><a href="/glossary.html">Словарь к стихам</a></li>
+        <li><a href="/glossary.html">Словарь к стихам и прозе</a></li>
         <li><a href="/faq.html">Частые вопросы</a></li>
       </ul>
     </div>
@@ -434,14 +436,15 @@ export function buildSectionPages(ctx) {
     const byTitle = works.find((w) => norm(w.title).includes(norm(entry.w)));
     return byTitle ? { line: '', work: byTitle, title: true } : null;
   };
+
   let wordTotal = 0;
 
-  page('glossary.html', 'Словарь к стихам Бунина',
-    'Диалектные и церковнославянские слова в стихах Бунина: пожня, околица, сень, сорокоуст — значения и примеры из текстов.',
+  page('glossary.html', 'Словарь к стихам и прозе Бунина',
+    'Диалектные, церковные и устаревшие слова в стихах и прозе Бунина: уста, сень, зипун, гумно, паперть — значения и примеры из текстов.',
     `${crumbs([['/', 'Главная'], [null, 'Словарь']])}
 <div class="wrap article-layout">
   <article>
-    <h1 style="font-size:clamp(30px,4.6vw,44px);margin-bottom:12px">Словарь к стихам</h1>
+    <h1 style="font-size:clamp(30px,4.6vw,44px);margin-bottom:12px">Словарь к стихам и прозе</h1>
     <div class="meta-line"><span class="badge">лексика</span><span>${(glossary.groups || []).reduce((s, g) => s + (g.words || []).length, 0)} слов</span><span>Обновлено ${esc(UPDATED_LABEL)}</span></div>
     <div class="prose">${(glossary.intro || []).map((p) => `<p>${esc(p)}</p>`).join('')}</div>
     ${(glossary.groups || []).map((g) => `<section style="margin-top:34px">
@@ -474,10 +477,10 @@ export function buildSectionPages(ctx) {
   </aside>
 </div>`,
     { active: '', breadcrumb: [['/', 'Главная'], ['/glossary.html', 'Словарь']], jsonLd: {
-      '@type': 'DefinedTermSet', name: 'Словарь к стихам Бунина', inLanguage: LANG,
+      '@type': 'DefinedTermSet', name: 'Словарь к стихам и прозе Бунина', inLanguage: LANG,
       hasDefinedTerm: (glossary.groups || []).flatMap((g) => (g.words || []).slice(0, 12).map((x) => ({ '@type': 'DefinedTerm', name: x.w, description: x.m }))),
     } });
-  search.push({ t: 'Словарь к стихам', u: '/glossary.html', g: 'Словарь', k: 'Лексика', s: 'Пожня, околица, сень, сорокоуст' });
+  search.push({ t: 'Словарь к стихам и прозе', u: '/glossary.html', g: 'Словарь', k: 'Лексика', s: 'Уста, сень, зипун, гумно, паперть' });
 
   // ---------- частые вопросы ----------
 
@@ -577,4 +580,25 @@ export function buildSectionPages(ctx) {
   for (const p of places) search.push({ t: `${p.title} — место`, u: `/places/${p.id}.html`, g: 'Место', k: p.kicker, s: p.subtitle });
 
   return { pages, urls, search, workTopics, topics };
+}
+
+// Первая содержательная строка текста для карточки подборки.
+// Сырой вики-текст начинается со служебных строк («=== НАЗВАНИЕ ===»,
+// «Оригинал здесь: …»), их в карточку пускать нельзя: они занимают весь блок
+// и превращают список подборки в простыню.
+function topicIsShort(text) {
+  return String(text || '').split(/\s+/).filter(Boolean).length < 220;
+}
+
+function topicFullText(text) {
+  return String(text || '').split('\n')
+    .filter((l) => !l.trim().startsWith('=') && !/^Оригинал здесь/i.test(l.trim()))
+    .join('\n').trim();
+}
+
+function topicFirstLine(text) {
+  const lines = String(text || '').split('\n').map((l) => l.trim()).filter(Boolean);
+  const clean = lines.filter((l) => !l.startsWith('=') && !/^Оригинал здесь/i.test(l));
+  const line = clean.find((l) => l.length > 20) || clean[0] || '';
+  return line.length > 130 ? line.slice(0, 129).replace(/[\s,;:—-]+$/, '') + '…' : line;
 }

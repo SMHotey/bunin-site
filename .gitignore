@@ -10,3 +10,9 @@ data/wiki-biografiya.txt
 *.log
 .DS_Store
 Thumbs.db
+
+# артефакты анализа корпуса (как у Есенина)
+reports/
+# временные файлы research-сессий
+.tmp_*/
+.tmp-*.mjs
