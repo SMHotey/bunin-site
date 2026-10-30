@@ -13,7 +13,12 @@
   ],
   "note": "Адрес и дата открытия — с сайта музея. Раньше в Воронеже действовала только экспозиция в составе литературного музея; отдельный дом-музей появился в 2020 году.",
   "url": "https://voronezhliter.ru/muzej-ivana-bunina-2",
-  "urlLabel": "Воронежский областной литературный музей: музей И. А. Бунина"
+  "urlLabel": "Воронежский областной литературный музей: музей И. А. Бунина",
+  "photo": "/img/places/voronezh-museum.jpg",
+  "photoAlt": "Музей И. А. Бунина в Воронеже, дом Германовской",
+  "photoCredit": "Фото: Ku6epKpa6, Wikimedia Commons",
+  "photoLicense": "CC BY-SA",
+  "photoSource": "https://commons.wikimedia.org/wiki/Category:House_of_Hermanovskaya"
  },
  {
   "id": "orel-museum",
@@ -29,7 +34,12 @@
   ],
   "note": "Дата и адрес — с портала Орловской области. Музей возник позже, чем музей в Ельце, хотя Орёл в биографии Бунина значит не меньше.",
   "url": "https://www.tourism-orel.ru/istoriya_i_kultura/muzei/muzei_bunina",
-  "urlLabel": "Страница музея на портале Орловской области"
+  "urlLabel": "Страница музея на портале Орловской области",
+  "photo": "/img/places/oryol-museum.jpg",
+  "photoAlt": "Дом-музей И. А. Бунина в Орле",
+  "photoCredit": "Фото: Vlad-Mier, Wikimedia Commons, CC BY-SA 4.0",
+  "photoLicense": "CC BY-SA 4.0",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:106.%D0%94%D0%BE%D0%BC-%D0%BC%D1%83%D0%B7%D0%B5%D0%B9_%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D0%B5%D0%BB%D1%8F_%D0%98%D0%B2%D0%B0%D0%BD%D0%B0_%D0%91%D1%83%D0%BD%D0%B8%D0%BD%D0%B0.%D0%9E%D1%80%D1%91%D0%BB_2016.jpg"
  },
  {
   "id": "elets-museum",
@@ -60,7 +70,13 @@
   ],
   "note": "Адрес в этом пакете не указан умышленно: перед публикацией его нужно сверить по сайту музея, а не брать из пересказов.",
   "url": "",
-  "urlLabel": ""
+  "urlLabel": "",
+  "photo": "/img/museums/efremov-museum.jpg",
+  "photoWebp": "/img/museums/efremov-museum.webp",
+  "photoAlt": "Дом-музей И. А. Бунина в Ефремове",
+  "photoCredit": "Alexander Roumega",
+  "photoLicense": "CC0",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:House-Museum_of_Ivan_Bunin_facade.JPG"
  },
  {
   "id": "paris-necropolis",
@@ -74,6 +90,11 @@
    "Надгробие по рисунку Александра Бенуа",
    "Русский некрополь эмиграции"
   ],
-  "note": "Год установки памятника в источниках не приводится; известен только автор рисунка — А. Н. Бенуа (Бабореко А. К. Материалы для биографии. М., 1967)."
+  "note": "Год установки памятника в источниках не приводится; известен только автор рисунка — А. Н. Бенуа (Бабореко А. К. Материалы для биографии. М., 1967).",
+  "photo": "/img/places/paris-grave.jpg",
+  "photoAlt": "Могила И. А. Бунина на кладбище Сент-Женевьев-де-Буа",
+  "photoCredit": "Фото: Antoine Rex, Wikimedia Commons",
+  "photoLicense": "CC BY-SA",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:Ivan_Bunins_grave.jpg"
  }
 ]

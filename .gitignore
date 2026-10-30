@@ -13,6 +13,9 @@ Thumbs.db
 
 # артефакты анализа корпуса (как у Есенина)
 reports/
+
+# состояние отправки в IndexNow (локальный кэш scripts/indexnow.mjs)
+.cache/
 # временные файлы research-сессий
 .tmp_*/
 .tmp-*.mjs

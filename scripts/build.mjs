@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { buildSectionPages } from './sections.mjs';
+import { genreArt, researchArt, musicArt, filmArt, personArt } from './art.mjs';
 
 const ROOT = process.cwd();
 const DIST = join(ROOT, 'dist');
@@ -279,6 +280,23 @@ window.addEventListener('load', function () {
   return out;
 }
 
+
+// Коды подтверждения прав из site.config.json → meta в шапке. Пустые значения
+// ничего не выводят, поэтому файл можно заполнять по мере регистрации в панелях.
+function verificationHtml() {
+  const v = config.verification || {};
+  const pairs = [
+    ['yandex', 'yandex-verification'],
+    ['google', 'google-site-verification'],
+    ['bing', 'msvalidate.01'],
+    ['mailru', 'mailru-verification'],
+  ];
+  return pairs
+    .filter(([k]) => String(v[k] || '').trim())
+    .map(([k, name]) => `<meta name="${name}" content="${esc(String(v[k]).trim())}">`)
+    .join('\n');
+}
+
 function layout({ title, description, content, active = '', bodyClass = '', jsonLd = [], noindex = false, ogType = 'website', preloadImage = '', breadcrumb = [] }) {
   const navHtml = nav.map(([href, label, key]) =>
     `<a href="${href}"${active === key ? ' aria-current="page"' : ''}>${label}</a>`).join('');
@@ -350,6 +368,7 @@ function layout({ title, description, content, active = '', bodyClass = '', json
 <meta name="description" content="${esc(descText)}">
 <meta name="robots" content="${noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'}">
 <link rel="canonical" href="__CANONICAL__">
+${verificationHtml()}
 <link rel="alternate" type="application/rss+xml" title="${esc(A.name)} — новые материалы" href="/feed.xml">
 ${preloadImage ? `<link rel="preload" href="${esc(preloadImage)}" as="image">` : ''}
 <link rel="dns-prefetch" href="//mc.yandex.ru">
@@ -458,7 +477,7 @@ function firstLine(text) {
 }
 
 function workCard(w) {
-  return `<a class="work-card" href="${workUrl(w)}">
+  return `<a class="work-card has-art" style="--card-art:url('${genreArt(w.genre)}')" href="${workUrl(w)}">
     <span class="genre">${esc(w.genre)}</span>
     <span class="title">${esc(w.title)}</span>
     <span class="year">${w.year ? esc(w.year) : 'дата не установлена'}</span>
@@ -468,7 +487,9 @@ function workCard(w) {
 
 function personCard(p) {
   return `<a class="person-card${p.photo ? ' has-photo' : ''}" href="/people/${p.id}.html">
-    ${p.photo ? `<img class="person-thumb" src="${esc(p.photo)}" alt="${esc(p.photoAlt || p.name)}" loading="lazy" width="96" height="120">` : ''}
+    ${p.photo
+      ? `<img class="person-thumb" src="${esc(p.photo)}" alt="${esc(p.photoAlt || p.name)}" loading="lazy" width="96" height="120">`
+      : `<img class="person-thumb person-thumb--art" src="${personArt(p)}" alt="" aria-hidden="true" loading="lazy" width="96" height="96">`}
     <span class="role">${esc(p.role)}</span>
     <span class="name">${esc(p.name)}</span>
     <span class="years">${esc(p.years)}</span>
@@ -603,7 +624,9 @@ const featured = (featuredTitles.length ? featuredTitles.map((t) => works.find((
   .filter(Boolean).slice(0, 6);
 
 const keyEventDates = config.home?.keyEvents || [];
+let keyHasThumbs = false;
 const keyEvents = (keyEventDates.length ? timeline.filter((e) => keyEventDates.includes(e.date)) : timeline).slice(0, 8);
+keyHasThumbs = keyEvents.some((e) => e.photo);
 
 const homePeopleIds = config.home?.featuredPeople || [];
 const homePeople = (homePeopleIds.length ? homePeopleIds.map((id) => people.find((p) => p.id === id)) : people.slice(0, 8))
@@ -673,7 +696,7 @@ const home = `
       <div class="panel">
         <h3>Ключевые даты</h3>
         <ul class="timeline-mini">
-          ${keyEvents.map((e) => `<li><span class="year">${esc(String(e.display || '').split(' ').slice(-1)[0])}</span><span class="what">${esc(e.title)}<small>${esc(e.display)}</small></span></li>`).join('')}
+          ${keyEvents.map((e) => `<li${keyHasThumbs ? ' class="has-photo"' : ''}>${e.photo ? `<img class="tl-thumb" src="${esc(e.photo)}" alt="${esc(e.photoAlt || e.title)}" loading="lazy" width="44" height="44">` : (keyHasThumbs ? '<span class="tl-thumb tl-thumb--empty" aria-hidden="true"></span>' : '')}<span class="year">${esc(String(e.display || '').split(' ').slice(-1)[0])}</span><span class="what">${esc(e.title)}<small>${esc(e.display)}</small></span></li>`).join('')}
         </ul>
         <p style="margin-top:14px"><a class="section-link" href="/life/timeline.html">Полная хронология →</a></p>
       </div>
@@ -765,7 +788,7 @@ ${homeBooks.length ? `<section class="section">
     </div>
     <div class="research-list">
       ${research.slice(0, 4).map((r) => `<div class="research-item">
-        <div class="research-year">${r.year}</div>
+        <div class="research-year"><span class="ri-art" style="--art:url('${researchArt(r.type)}')" aria-hidden="true"></span>${r.year}</div>
         <div><h3>${esc(r.title)}</h3><div class="authors">${esc((r.authors || []).join(', '))}</div>
         <div class="pub">${esc(r.publisher)}${r.pages ? ', ' + esc(r.pages) : ''}</div>
         <p class="annotation">${esc(r.annotation)}</p></div>
@@ -1004,12 +1027,13 @@ ${crumbs([['/', 'Главная'], ['/life/', 'Жизнь'], [null, 'Увлеч�
   </div>`).join('') : '<div class="note">Раздел готовится.</div>'}
 </div>`;
 
+const tlHasThumbs = timeline.some((e) => e.photo);
 const timelinePage = `
 ${crumbs([['/', 'Главная'], ['/life/', 'Жизнь'], [null, 'Хронология']])}
 <div class="wrap page-head"><h1>Хронология</h1><p>${timeline.length} ${plural(timeline.length, ['событие', 'события', 'событий'])} — от рождения до последних лет.</p></div>
 <div class="wrap" style="padding-bottom:60px">
-  <ul class="timeline-mini" style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 24px">
-    ${timeline.map((e) => `<li><span class="year">${esc(e.display)}</span><span class="what"><b>${esc(e.title)}</b><small>${esc(e.text)}</small></span></li>`).join('')}
+  <ul class="timeline-mini${tlHasThumbs ? ' has-thumbs' : ''}" style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 24px">
+    ${timeline.map((e) => `<li${e.photo ? ' class="has-photo"' : ''}>${e.photo ? `<img class="tl-thumb" src="${esc(e.photo)}" alt="${esc(e.photoAlt || e.title)}" loading="lazy" width="44" height="44">` : (tlHasThumbs ? '<span class="tl-thumb tl-thumb--empty" aria-hidden="true"></span>' : '')}<span class="year">${esc(e.display)}</span><span class="what"><b>${esc(e.title)}</b><small>${esc(e.text)}</small></span></li>`).join('')}
   </ul>
 </div>`;
 
@@ -1059,7 +1083,7 @@ ${crumbs([['/', 'Главная'], [null, 'Библиотека']])}
 <div class="wrap">
   <div class="results-line"><span>Найдено: <b data-result-count>${works.length}</b></span><span>${TEXTS_PD ? 'Полные тексты с указанием источника' : 'Метаданные и ссылки на издания'}</span></div>
   <div class="catalog-grid" data-catalog>
-    ${works.map((w) => `<a class="catalog-card" href="${workUrl(w)}" data-title="${esc(w.title)}" data-genre="${esc(w.genre)}" data-decade="${w.year ? Math.floor(w.year / 10) * 10 : ''}" data-year="${w.year || ''}" data-chars="${w.chars || 0}" data-first="${esc(firstLine(w.text))}">
+    ${works.map((w) => `<a class="catalog-card has-art" style="--card-art:url('${genreArt(w.genre)}')" href="${workUrl(w)}" data-title="${esc(w.title)}" data-genre="${esc(w.genre)}" data-decade="${w.year ? Math.floor(w.year / 10) * 10 : ''}" data-year="${w.year || ''}" data-chars="${w.chars || 0}" data-first="${esc(firstLine(w.text))}">
       <span class="t">${esc(w.title)}</span>
       <span class="f">${esc(firstLine(w.text))}</span>
       <span class="m">${w.year ? w.year : '—'} · ${esc(w.genre)}</span>
@@ -1188,7 +1212,7 @@ ${crumbs([['/', 'Главная'], [null, 'Научные работы']])}
   <div class="note">Раздел задуман как отправная точка для исследования. Аннотации кратко описывают тему работы и не заменяют чтение источника.</div>
   <div class="research-list">
     ${research.slice().sort((a, b) => b.year - a.year).map((r) => `<article class="research-item">
-      <div class="research-year">${r.year}</div>
+      <div class="research-year"><span class="ri-art" style="--art:url('${researchArt(r.type)}')" aria-hidden="true"></span>${r.year}</div>
       <div>
         <h3>${esc(r.title)}</h3>
         <div class="authors">${esc((r.authors || []).join(', '))}</div>
@@ -1221,6 +1245,18 @@ ${crumbs([['/', 'Главная'], [null, 'Источники']])}
   <div class="note">Дата обращения ко всем источникам — ${esc(UPDATED_LABEL)}. Ссылки проверяются ежемесячно; устаревшие адреса фиксируются в журнале обновлений.</div>
 </div>`;
 
+// Статус версии → тип для оформления и легенды. Слова в данных человеческие
+// («спорно», «уточнено»), классы — машинные: open / draft / done.
+const VERSION_STATUS = {
+  'дискуссионно': 'open',
+  'спорно': 'open',
+  'уточняется': 'open',
+  'версия': 'draft',
+  'гипотеза': 'draft',
+  'уточнено': 'done',
+  'документировано': 'done',
+};
+
 const versionsPage = `
 ${crumbs([['/', 'Главная'], [null, 'Версии']])}
 <div class="wrap page-head">
@@ -1228,11 +1264,17 @@ ${crumbs([['/', 'Главная'], [null, 'Версии']])}
   <p>Здесь собраны сюжеты, по которым в литературе нет единого мнения. Мы не выдаём версии за установленные факты.</p>
 </div>
 <div class="wrap" style="padding-bottom:50px">
-  ${versions.map((v) => `<details class="version-card">
+  <div class="version-legend">
+    <span class="vl-item"><i class="vl-dot" data-t="open"></i>дискуссионно — спор продолжается</span>
+    <span class="vl-item"><i class="vl-dot" data-t="draft"></i>версия — есть гипотеза, нет подтверждения</span>
+    <span class="vl-item"><i class="vl-dot" data-t="done"></i>уточнено — версия снята исследованиями</span>
+  </div>
+  ${versions.map((v) => `<details class="version-card" data-status="${esc(VERSION_STATUS[v.status] || 'open')}">
     <summary>${esc(v.question)}<span class="status">${esc(v.status)}</span></summary>
     <div class="version-body">
-      <ul>${v.versions.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
-      <p style="font-size:13px;color:var(--muted)">${esc(v.note)}</p>
+      ${v.lead ? `<p class="version-lead">${esc(v.lead)}</p>` : ''}
+      <ul class="version-list">${v.versions.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+      <p class="version-note">${esc(v.note)}</p>
     </div>
   </details>`).join('')}
   <div class="note">Если вы заметили неточность — опишите её и укажите источник. Каждая правка проходит проверку и фиксируется в журнале обновлений.</div>
@@ -1805,6 +1847,33 @@ ${feedItems.map((i) => `  <item>
 </channel>
 </rss>`;
 await writeFile(join(DIST, 'feed.xml'), feed, 'utf8');
+
+// IndexNow: файл-ключ в корне подтверждает владение доменом для Яндекса и Bing.
+// После деплоя scripts/indexnow.mjs отправляет адреса страниц на переобход.
+const indexNowKey = String(config.indexNow?.key || '').trim();
+const indexNowOn = config.indexNow?.enabled !== false && /^[A-Za-z0-9-]{8,128}$/.test(indexNowKey);
+if (indexNowOn) {
+  await writeFile(join(DIST, `${indexNowKey}.txt`), indexNowKey, 'utf8');
+}
+
+// Подтверждение прав Яндекс.Вебмастера файлом: yandex_<код>.html, содержимое как есть.
+const yandexCode = String(config.verification?.yandex || '').trim();
+if (/^[A-Za-z0-9]+$/.test(yandexCode)) {
+  const body = `<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body>Verification: ${yandexCode}</body>
+</html>`;
+  await writeFile(join(DIST, `yandex_${yandexCode}.html`), body, 'utf8');
+}
+
+// Подтверждение прав Google Search Console файлом: google<код>.html.
+const googleCode = String(config.verification?.google || '').trim();
+if (/^[A-Za-z0-9_-]+$/.test(googleCode)) {
+  await writeFile(join(DIST, `google${googleCode}.html`), `google-site-verification: google${googleCode}.html`, 'utf8');
+}
+
 await writeFile(join(DIST, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /404.html\nSitemap: ${SITE}/sitemap.xml\n`, 'utf8');
 
 // llms.txt — краткая карта сайта для ИИ-поиска (AEO/GEO)

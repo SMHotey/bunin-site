@@ -110,5 +110,15 @@
   "analytics": {
     "yandexMetrika": "",
     "googleAnalytics": ""
+  },
+  "verification": {
+    "yandex": "",
+    "google": "",
+    "bing": "",
+    "mailru": ""
+  },
+  "indexNow": {
+    "enabled": true,
+    "key": "9c6ab87f5ca93d842420b3fd02fd3df7"
   }
 }

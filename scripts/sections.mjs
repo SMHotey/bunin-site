@@ -3,6 +3,8 @@
 // Все тексты написаны для проекта; факты и общедоступные сведения — без заимствованных
 // фрагментов чужих статей.
 
+import { musicArt, filmArt, topicArt } from './art.mjs';
+
 export function buildSectionPages(ctx) {
   const {
     A, SITE, LANG, UPDATED, UPDATED_LABEL, esc, plural, norm, crumbs, workUrl,
@@ -65,7 +67,7 @@ export function buildSectionPages(ctx) {
 </div>
 <div class="wrap" style="padding-bottom:50px">
   <div class="works-grid">
-    ${topics.map((t) => `<a class="work-card" href="/topics/${t.id}.html">
+    ${topics.map((t) => `<a class="work-card has-art" style="--card-art:url('${topicArt(t.id)}')" href="/topics/${t.id}.html">
       <span class="genre">${esc(t.kicker || 'Подборка')}</span>
       <span class="title">${esc(t.title)}</span>
       <span class="year">${(topicWorks.get(t.id) || []).length} ${plural((topicWorks.get(t.id) || []).length, ['текст', 'текста', 'текстов'])}</span>
@@ -277,17 +279,18 @@ export function buildSectionPages(ctx) {
   search.push({ t: 'Гибель писателя', u: '/legacy/gibel.html', g: 'Наследие', k: '1953, Кламар', s: 'Обстоятельства, документы, версии' });
 
   page('legacy/memory.html', 'Музеи и памятники Бунину',
-    'Музеи Бунина в Воронеже и Москве, Спас-Клепики, памятник на Тверском бульваре и могила на Ваганьковском: адреса памяти писателя.',
+    'Музеи Бунина в Воронеже, Орле, Ельце и Ефремове, памятники в Воронеже, Орле и Грасе, могила в Сент-Женевьев-де-Буа: адреса памяти писателя.',
     `${crumbs([['/', 'Главная'], ['/legacy/', 'Наследие'], [null, 'Музеи и памятники']])}
 <div class="wrap page-head">
   <h1>Музеи и памятники</h1>
-  <p>Четыре музея и три адреса памяти. Это не путеводитель: часы работы меняются, а экспозиции обновляются — здесь важно, что именно хранится и почему это место имеет значение.</p>
+  <p>${museums.length} музеев, ${monuments.length} памятников и могила под Парижем. Это не путеводитель: часы работы меняются, а экспозиции обновляются — здесь важно, что именно хранится и почему это место имеет значение.</p>
 </div>
 <div class="wrap" style="padding-bottom:40px">
   <h2 style="font-size:26px;margin-bottom:14px">Музеи</h2>
   ${museums.map((m) => `<div class="panel" style="margin-bottom:14px">
     <div class="meta-line"><span class="badge">${esc(m.place)}</span>${m.founded ? `<span>${esc(m.founded)}</span>` : ''}</div>
     <h3 style="font-size:22px">${esc(m.name)}</h3>
+    ${m.photo ? `<figure class="card-photo"><img src="${esc(m.photo)}" alt="${esc(m.photoAlt || m.name)}" loading="lazy" width="640" height="420"><figcaption>${esc(m.photoCredit || 'Фото: Wikimedia Commons')}</figcaption></figure>` : ''}
     ${m.address ? `<p style="font-size:13px;color:var(--muted);margin:0 0 8px">${esc(m.address)}</p>` : ''}
     <p style="color:var(--ink-soft);max-width:72ch">${esc(m.about)}</p>
     ${m.url ? `<p style="margin:8px 0 0"><a href="${esc(m.url)}" rel="noopener external" target="_blank">${esc(m.urlLabel || 'Официальный сайт')} <span aria-hidden="true">↗</span></a></p>` : ''}
@@ -298,12 +301,13 @@ export function buildSectionPages(ctx) {
   ${monuments.map((m) => `<div class="panel" style="margin-bottom:14px">
     <div class="meta-line"><span class="badge">${esc(m.place)}</span>${m.year ? `<span>${esc(m.year)}</span>` : ''}</div>
     <h3 style="font-size:22px">${esc(m.name)}</h3>
+    ${m.photo ? `<figure class="card-photo"><img src="${esc(m.photo)}" alt="${esc(m.photoAlt || m.name)}" loading="lazy" width="640" height="420"><figcaption>${esc(m.photoCredit || 'Фото: Wikimedia Commons')}</figcaption></figure>` : ''}
     <p style="color:var(--ink-soft);max-width:72ch">${esc(m.about)}</p>
     ${m.note ? `<p style="font-size:13px;color:var(--muted);margin:0">${esc(m.note)}</p>` : ''}
   </div>`).join('')}
   <div class="prose" style="margin-top:30px">
     <h2>Как память становится инфраструктурой</h2>
-    <p>Бунинские места работают не по отдельности, а как сеть: музей-заповедник в Воронеже связан со школой в Спас-Клепиках, московский музей — с домом, где писатель жил до революции, а памятники и могила замыкают маршрут на двух кладбищах и бульварах. Для читателя это удобно: биография перестаёт быть текстом и становится картой.</p>
+    <p>Бунинские места работают не по отдельности, а как сеть: воронежский музей занимает дом, где писатель родился; орловский и елецкий — те города, где прошли гимназические годы и куда он возвращался в письмах; ефремовский дом-музей держит усадебный быт тургеневской эпохи. Памятники ставят на площадях и бульварах, а могила на кладбище Сент-Женевьев-де-Буа замыкает маршрут за границей. Для читателя это удобно: биография перестаёт быть текстом и становится картой.</p>
     <p>Отдельная часть памяти — имена. Улицы, библиотеки, школы и премии названы в честь писателя; в разных городах проходят бунинские чтения и конференции. Мы не пытаемся перечислить их все: списки быстро устаревают, а принцип важнее перечня.</p>
   </div>
   <div class="note" style="margin-top:22px">Адреса, режим работы и стоимость билетов уточняйте на официальных сайтах музеев. Если вы заметили неточность — напишите, указав источник; правка будет внесена после проверки.</div>
@@ -311,7 +315,7 @@ export function buildSectionPages(ctx) {
     { active: 'legacy', breadcrumb: [['/', 'Главная'], ['/legacy/', 'Наследие'], ['/legacy/memory.html', 'Музеи и памятники']], jsonLd: [
       { '@type': 'ItemList', name: 'Музеи Бунина', numberOfItems: museums.length, itemListElement: museums.map((m, i) => ({ '@type': 'ListItem', position: i + 1, item: { '@type': 'Museum', name: m.name, address: m.address, url: `${SITE}/legacy/memory.html` } })) },
     ] });
-  search.push({ t: 'Музеи и памятники', u: '/legacy/memory.html', g: 'Наследие', k: 'Адреса памяти', s: 'Воронеж, Москва, Спас-Клепики' });
+  search.push({ t: 'Музеи и памятники', u: '/legacy/memory.html', g: 'Наследие', k: 'Адреса памяти', s: 'Воронеж, Орёл, Елец, Париж' });
 
   page('legacy/music.html', 'Бунин в музыке: песни, романсы, Свиридов',
     'Песни и романсы на стихи Бунина, «Поэма памяти Ивана Бунина» Свиридова: что стало музыкой, кто и как исполняет, что теряется при переложении.',
@@ -323,7 +327,7 @@ export function buildSectionPages(ctx) {
     <div class="prose">${(music.intro || []).map((p) => `<p>${esc(p)}</p>`).join('')}</div>
     <div class="research-list" style="margin-top:26px">
       ${(music.items || []).map((m) => `<article class="research-item">
-        <div class="research-year">${esc(m.year || '')}</div>
+        <div class="research-year"><span class="ri-art" style="--art:url('${musicArt(m.kind)}')" aria-hidden="true"></span>${esc(m.year || '')}</div>
         <div>
           <h3>${esc(m.title)}</h3>
           <div class="authors">${esc(m.kind || '')}${m.work ? ` · стихи: «${esc(m.work)}»` : ''}</div>
@@ -363,7 +367,7 @@ export function buildSectionPages(ctx) {
     <div class="prose">${(films.intro || []).map((p) => `<p>${esc(p)}</p>`).join('')}</div>
     <div class="research-list" style="margin-top:26px">
       ${(films.items || []).map((f) => `<article class="research-item">
-        <div class="research-year">${esc(f.year || '')}</div>
+        <div class="research-year"><span class="ri-art" style="--art:url('${filmArt(f.kind)}')" aria-hidden="true"></span>${esc(f.year || '')}</div>
         <div>
           <h3>${esc(f.title)}</h3>
           <div class="authors">${esc(f.kind || '')}${f.authors ? ' · ' + esc(f.authors) : ''}</div>

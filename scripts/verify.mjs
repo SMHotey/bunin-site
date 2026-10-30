@@ -325,6 +325,38 @@ else {
   }
 }
 
+// --- вики-разметка в источниках произведений ---
+// Импортёр тянул библиографическую ссылку как есть: {{книга|…}}, [http://… метка],
+// &nbsp;, '''…'''. На странице это не видно, но в данных это мусор.
+try {
+  const worksData = JSON.parse(await readFile('data/works.json', 'utf8'));
+  const dirty = worksData.filter((x) => /\{\{|\}\}|\[https?:|&nbsp;|'''|<ref/.test(String(x.source || '')));
+  if (dirty.length) {
+    errors.push(`data/works.json: вики-разметка в source у ${dirty.length} записей (например, «${dirty[0].title}») — запустить npm run clean:sources`);
+  } else {
+    info.push('источники произведений без вики-разметки');
+  }
+} catch {
+  warnings.push('data/works.json: не удалось проверить поле source');
+}
+
+// --- служебные файлы поисковиков: ключ IndexNow и файлы подтверждения ---
+const indexNowKey = String(config.indexNow?.key || '').trim();
+if (config.indexNow?.enabled !== false && indexNowKey) {
+  const keyPath = join(DIST, `${indexNowKey}.txt`);
+  if (!existsSync(keyPath)) errors.push(`нет файла ключа IndexNow dist/${indexNowKey}.txt`);
+  else info.push('IndexNow: ключ на месте');
+}
+for (const [kind, prefix, content] of [['yandex', 'yandex_', 'Verification: '], ['google', 'google', 'google-site-verification: ']]) {
+  const code = String(config.verification?.[kind] || '').trim();
+  if (!code) continue;
+  const file = join(DIST, `${prefix}${code}.html`);
+  if (!existsSync(file)) errors.push(`нет файла подтверждения ${kind}: dist/${prefix}${code}.html`);
+  else if (!(await readFile(file, 'utf8')).includes(content + (kind === 'google' ? `google${code}.html` : code))) {
+    errors.push(`файл ${prefix}${code}.html не содержит код подтверждения`);
+  } else info.push(`${kind}: файл подтверждения на месте`);
+}
+
 // --- итог ---
 const totalBytes = (await Promise.all(files.map((f) => stat(f).then((s) => s.size)))).reduce((a, b) => a + b, 0);
 info.push(`страниц: ${htmlFiles.length}, файлов: ${files.length}`);

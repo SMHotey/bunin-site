@@ -5,7 +5,13 @@
   "place": "Воронеж",
   "year": "1995",
   "about": "Памятник открыт 13 октября 1995 года в сквере имени Бунина на перекрёстке Плехановской и Орджоникидзе, к 125-летию со дня рождения писателя. Скульптор Александр Бурганов.",
-  "note": "Первый городской памятник Бунину в России — на родине писателя."
+  "note": "Первый городской памятник Бунину в России — на родине писателя.",
+  "photo": "/img/monuments/voronezh-sculpture.jpg",
+  "photoWebp": "/img/monuments/voronezh-sculpture.webp",
+  "photoAlt": "Памятник Ивану Бунину в Воронеже",
+  "photoCredit": "Елена Ч.",
+  "photoLicense": "CC BY-SA 4.0",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:%D0%9F%D0%B0%D0%BC%D1%8F%D1%82%D0%BD%D0%B8%D0%BA_%D0%91%D1%83%D0%BD%D0%B8%D0%BD%D1%83._%D0%92%D0%BE%D1%80%D0%BE%D0%BD%D0%B5%D0%B6.jpg"
  },
  {
   "id": "orel-sculpture",
@@ -13,7 +19,13 @@
   "place": "Орёл",
   "year": "",
   "about": "Памятник на Пролетарской (Левашовой) горе — месте, откуда открывается вид на город, в котором прошла юность писателя. Скульптор Вячеслав Клыков, архитектор Роман Семерджиев.",
-  "note": "Год открытия в проверенных источниках не указан — оставлен пустым, чтобы не поставить неверную дату."
+  "note": "Год открытия в проверенных источниках не указан — оставлен пустым, чтобы не поставить неверную дату.",
+  "photo": "/img/monuments/orel-sculpture.jpg",
+  "photoWebp": "/img/monuments/orel-sculpture.webp",
+  "photoAlt": "Памятник Ивану Бунину в Орле",
+  "photoCredit": "Sergey Sebelev",
+  "photoLicense": "CC BY-SA 4.0",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:%D0%9F%D0%B0%D0%BC%D1%8F%D1%82%D0%BD%D0%B8%D0%BA_%D0%91%D1%83%D0%BD%D0%B8%D0%BD%D1%83_%D0%B2_%D0%9E%D1%80%D0%BB%D0%B5.jpg"
  },
  {
   "id": "moscow-povarskaya",
@@ -29,7 +41,13 @@
   "place": "Грас, Франция",
   "year": "2017",
   "about": "Полноразмерный памятник открыт 3 июня 2017 года в парке виллы Сент-Илэр — там, где Бунин жил в 1920—1930-е годы. Автор — скульптор Андрей Ковальчук.",
-  "note": "Грас — город, связанный с самыми плодотворными годами эмиграции: здесь написаны «Жизнь Арсеньева» и «Тёмные аллеи»."
+  "note": "Грас — город, связанный с самыми плодотворными годами эмиграции: здесь написаны «Жизнь Арсеньева» и «Тёмные аллеи».",
+  "photo": "/img/monuments/grasse-monument.jpg",
+  "photoWebp": "/img/monuments/grasse-monument.webp",
+  "photoAlt": "Памятник Ивану Бунину в Грасе",
+  "photoCredit": "Ryleeva",
+  "photoLicense": "CC BY-SA 4.0",
+  "photoSource": "https://commons.wikimedia.org/wiki/File:%D0%9F%D0%B0%D0%BC%D1%8F%D1%82%D0%BD%D0%B8%D0%BA_%D0%98.%D0%90.%D0%91%D1%83%D0%BD%D0%B8%D0%BD%D1%83_%D0%B2_%D0%B3._%D0%93%D1%80%D0%B0%D1%81%D1%81%D0%B5_(%D0%A4%D1%80%D0%B0%D0%BD%D1%86%D0%B8%D1%8F).jpg"
  },
  {
   "id": "grasse-bust",
