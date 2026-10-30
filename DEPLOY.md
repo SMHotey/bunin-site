@@ -5,8 +5,8 @@
 
 ## 1. Перед публикацией
 
-1. **Домен.** Боевой адрес — `https://poet-esenin.ru` (второй домен `poet-esenin.online`
-   и `www`-хосты отдают 301 на основной). Он уже прописан в `site.config.json` → `siteUrl`,
+1. **Домен.** Боевой адрес — `https://poet-bunin.ru` (домен зарегистрирован 22.10.2026,
+   регистратор reg.ru; `www` отдаёт 301 на основной). Он прописан в `site.config.json` → `siteUrl`,
    от него зависят `canonical`, OpenGraph, `sitemap.xml`, `robots.txt`, `llms.txt` и `CNAME`.
 
 2. **Партнёрские метки.** В `affiliate.stores` заполните `tag` для магазинов, где у вас есть
@@ -68,11 +68,22 @@ npm run preview   # http://localhost:4173
 `vercel.json` в корне: `buildCommand` и `outputDirectory` заданы, security- и cache-заголовки продублированы.
 Vercel отдаёт `404.html` для неизвестных путей автоматически.
 
-### GitHub Pages
+### GitHub Pages (боевой хостинг)
 
-Workflow `.github/workflows/deploy.yml` собирает и публикует `dist/` при пуше в `master`.
-В настройках репозитория включите Pages → Source: GitHub Actions.
-Файл `.nojekyll` создаётся сборкой, чтобы GitHub не трогал каталоги с подчёркиванием.
+Workflow `.github/workflows/deploy.yml` собирает и публикует `dist/` при пуше в `master`
+и по расписанию (06:30 МСК — чтобы выходили запланированные публикации).
+
+1. Репозиторий: `github.com/SMHotey/bunin-site`, Pages → Source: GitHub Actions.
+2. Кастомный домен `poet-bunin.ru`. Сборка пишет `dist/CNAME`, поэтому домен приезжает
+   вместе с артефактом; то же значение должно стоять в настройках Pages.
+3. DNS — **только DNS, без прокси** (как у второго проекта):
+   - `A @ 185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+   - `CNAME www smhotey.github.io`
+4. Сертификат Let's Encrypt GitHub выпускает сам, когда DNS уже указывает на Pages.
+   «Enforce HTTPS» включать только после появления сертификата.
+5. `.nojekyll` создаётся сборкой, чтобы GitHub не трогал каталоги с подчёркиванием.
+6. После публикации workflow сам отправляет изменённые адреса в IndexNow
+   (`scripts/indexnow.mjs --recent 2`); файл ключа пишет сборка.
 
 ### nginx
 
@@ -124,7 +135,10 @@ CSS/JS подключаются как `/styles.css?v=<hash>`. Хэш счита
 | Книги и ссылки | `data/books.json` | раз в квартал: цены, наличие, новые издания |
 | Научные работы | `data/research.json` | раз в полгода |
 | Источники | `data/sources.json` | раз в квартал |
-| Дата обновления | `site.config.json` → `updated` | при каждой публикации |
+| Дата обновления разделов | `data/updated.json` (считается из git: `npm run stamp:updated`) | автоматически перед сборкой |
+| Тексты журнала | `content/publications/*.md` | 1 публикация в будни; проверяет `npm run audit:texts` |
+| Фото музеев и памятников | `python scripts/import-media.py` | по мере необходимости |
+| Источники произведений | `npm run clean:sources` | после импорта текстов |
 
 После правок: `npm run verify` и деплой.
 
@@ -151,12 +165,14 @@ CSS/JS подключаются как `/styles.css?v=<hash>`. Хэш счита
 
 ## 7. Что осталось сделать руками
 
-- [x] Заменить `siteUrl` на боевой домен — `https://poet-esenin.ru`.
-- [ ] Заполнить партнёрские метки магазинов.
-- [x] Аналитика: «Яндекс.Метрика» № 113725113 (включая Вебвизор и карту кликов), страница
-      `/privacy.html` собрана, ссылка в подвале.
-- [x] OG-картинка 1200×630 собрана (`scripts/make-og.py`); пересоберите после смены домена.
+- [x] Заменить `siteUrl` на боевой домен — `https://poet-bunin.ru`.
+- [x] Хостинг: GitHub Pages, репозиторий `SMHotey/bunin-site`, workflow собирает и публикует.
+- [x] IndexNow: ключ в `site.config.json`, файл ключа пишется сборкой, отправка в workflow.
+- [ ] DNS у регистратора: A-записи на адреса GitHub Pages и `www` → `smhotey.github.io`.
+- [ ] После выпуска сертификата включить «Enforce HTTPS».
+- [ ] Заполнить партнёрские метки магазинов (`affiliate.stores.*.tag`).
+- [ ] Включить «Яндекс.Метрику» (`analytics.yandexMetrika`) — счётчик и `/privacy.html` уже готовы.
+- [ ] Подтвердить домен в Яндекс.Вебмастере и Google Search Console (`verification.yandex` / `.google`),
+      отправить `sitemap.xml`.
 - [ ] Проверить книги: ссылки, ISBN, наличие.
-- [ ] В панели хостинга привязать оба домена: `poet-esenin.ru` — основной, `poet-esenin.online`
-      — 301 на основной (правила уже лежат в `_redirects` и `vercel.json`).
 - [ ] Прогнать `npm run verify:strict` и убедиться, что предупреждений не осталось.

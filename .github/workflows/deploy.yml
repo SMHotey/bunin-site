@@ -26,6 +26,8 @@ jobs:
         with:
           node-version: 20
       - run: npm run verify
+      - name: IndexNow — отправка правленных адресов Яндексу и Bing
+        run: node scripts/indexnow.mjs --recent 2
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
