@@ -286,6 +286,45 @@ for (const f of ['404.html', 'robots.txt', 'sitemap.xml', 'search.json', '_heade
 if (!existsSync(join(DIST, 'books/index.html'))) errors.push('нет страницы /books/');
 if (!existsSync(join(DIST, 'theme.js'))) errors.push('нет /theme.js (анти-вспышка темы)');
 
+// --- редакционный тон страниц ---
+// Формулы, которые выдают текст, собранный роботом: обращение к учителю,
+// обещания «вы узнаете», канцелярские концовки. Проверяем весь dist, а не
+// только журнал: эти фразы умеют просачиваться в описания разделов.
+const BAD_TONE = [
+  'как использовать на уроке',
+  'что использовать на уроке',
+  'что важно знать к разбору',
+  'по одной публикации в день',
+  'факты сверены с академическими изданиями',
+  'формулировки — наши',
+  'в этой статье мы расскажем',
+  'вы узнаете',
+];
+for (const f of htmlFiles) {
+  const text = await readFile(f, 'utf8');
+  const low = text.toLowerCase();
+  for (const phrase of BAD_TONE) {
+    if (low.includes(phrase)) errors.push(`${f}: редакционная формула «${phrase}» — переписать живым текстом`);
+  }
+}
+
+// --- «Обновлено»: фактическая дата правки ---
+// Одна дата на всех страницах означает, что lastmod и подвал считаются от
+// сборки, а не от правки материала. Манифест обязан быть, даты — различаться.
+if (!existsSync('data/updated.json')) errors.push('data/updated.json: нет манифеста дат разделов — запустить npm run stamp:updated');
+else {
+  const manifest = JSON.parse(await readFile('data/updated.json', 'utf8'));
+  const sections = manifest.sections || {};
+  if (!Object.keys(sections).length) errors.push('data/updated.json: пустой манифест разделов');
+  const sitemapXml = await readFile(join(DIST, 'sitemap.xml'), 'utf8');
+  const dates = new Set([...sitemapXml.matchAll(/<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>/g)].map((m) => m[1]));
+  if (dates.size === 1 && htmlFiles.length > 50) {
+    errors.push(`sitemap: lastmod одинаковый у всех страниц (${[...dates][0]}) — дата берётся от сборки, а не от правки`);
+  } else {
+    info.push(`lastmod: ${dates.size} различных дат`);
+  }
+}
+
 // --- итог ---
 const totalBytes = (await Promise.all(files.map((f) => stat(f).then((s) => s.size)))).reduce((a, b) => a + b, 0);
 info.push(`страниц: ${htmlFiles.length}, файлов: ${files.length}`);
