@@ -309,7 +309,19 @@ p { margin: 0 0 1em; }
   border: 1px solid var(--line); filter: grayscale(.6) contrast(1.03);
 }
 [data-theme="light"] .timeline-mini .tl-thumb { filter: none; }
-@media (max-width: 560px) { .timeline-mini li.has-photo { grid-template-columns: 36px 1fr; } .timeline-mini .tl-thumb { width: 36px; height: 36px; } }
+/* На узком экране: миниатюра слева на две строки, дата и текст — в правой колонке.
+   Раньше здесь было просто 36px 1fr, и третья ячейка (текст) уезжала в колонку 36px:
+   отсюда «по слову в строке». */
+@media (max-width: 620px) {
+  .timeline-mini.has-thumbs li {
+    grid-template-columns: 36px 1fr;
+    grid-template-areas: "thumb year" "thumb what";
+    column-gap: 12px; row-gap: 4px;
+  }
+  .timeline-mini.has-thumbs li .tl-thumb { grid-area: thumb; width: 36px; height: 36px; }
+  .timeline-mini.has-thumbs li .year { grid-area: year; }
+  .timeline-mini.has-thumbs li .what { grid-area: what; }
+}
 .timeline-mini .what small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
 
 .people-chips { display: flex; flex-wrap: wrap; gap: 8px; }
