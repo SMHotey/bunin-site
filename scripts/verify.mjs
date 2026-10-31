@@ -43,7 +43,10 @@ function distPathFor(urlPath) {
 }
 
 const files = await walk(DIST);
-const htmlFiles = files.filter((f) => extname(f) === '.html');
+// Файлы подтверждения прав (yandex_<код>.html, google<код>.html и подобные) — служебные
+// заглушки поисковиков: у них нет ни canonical, ни title, правила обычных страниц к ним не относятся.
+const VERIFICATION_FILE = /(?:^|\/)(?:yandex|google|msvalidate|mailru)[_-]?[A-Za-z0-9]+\.html$/i;
+const htmlFiles = files.filter((f) => extname(f) === '.html').filter((f) => !VERIFICATION_FILE.test(f.replace(/\\/g, '/')));
 const titles = new Map();
 
 // Фотографии персон: файл на месте, лицензия свободная, подпись и ссылка на файл есть.
