@@ -19,3 +19,8 @@ reports/
 # временные файлы research-сессий
 .tmp_*/
 .tmp-*.mjs
+
+# промежуточные результаты генерации партнёрских ссылок (в данные попадает books.json)
+affiliate_links.json
+affiliate_validation.json
+scripts/__pycache__/
