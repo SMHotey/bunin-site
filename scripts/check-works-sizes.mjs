@@ -136,11 +136,11 @@ function align(ours, theirs) {
   while (i < ours.length && j < theirs.length && j >= 0) {
     if (ours[i] === theirs[j]) { matched += 1; i += 1; j += 1; continue; }
     let resync = false;
-    for (let skip = 1; skip <= 4 && j + skip < theirs.length; skip += 1) {
+    for (let skip = 1; skip <= 30 && j + skip < theirs.length; skip += 1) {
       if (ours[i] === theirs[j + skip]) { j += skip; resync = true; break; }
     }
     if (resync) continue;
-    for (let skip = 1; skip <= 2 && i + skip < ours.length; skip += 1) {
+    for (let skip = 1; skip <= 10 && i + skip < ours.length; skip += 1) {
       if (ours[i + skip] === theirs[j]) { i += skip; resync = true; break; }
     }
     if (resync) continue;
@@ -204,10 +204,12 @@ for (const w of queue) {
       const theirs = words(stripLeadMarks(orig.html, w.title)).filter((w) => !/^[a-z]+[0-9]*$/.test(w));
       const ratio = theirs.length ? +(ours.length / theirs.length).toFixed(3) : null;
       const a = align(ours, theirs);
+      // Обрыв — это хвост оригинала после конца нашего текста. Низкое покрытие при
+      // пустом хвосте означает иную редакцию или редакционные вставки, а не потерю конца.
       let status = 'ok';
-      if (a.covered < 0.5) status = 'не совпадает с оригиналом';
-      else if (a.covered < 0.9) status = 'расхождения в тексте';
+      if (!a.found) status = 'не совпадает с оригиналом';
       else if (a.tailWords > 25) status = 'обрезано';
+      else if (a.covered < 0.9) status = 'расхождения в тексте';
       row = { title: w.title, page: orig.title, status, ratio, covered: a.covered, tailWords: a.tailWords,
         tailSample: a.tailWords ? a.tailSample : '', oursWords: ours.length, origWords: theirs.length };
     }
