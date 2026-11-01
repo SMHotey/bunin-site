@@ -365,13 +365,22 @@ p { margin: 0 0 1em; }
   background: var(--paper-2) var(--art, none) center / 82% no-repeat;
 }
 @media print {
-  .work-card.has-art::before, .ri-art { display: none !important; }
+  .work-card.has-art::before, .work-card-thumb, .lead-figure, .ri-art { display: none !important; }
 }
 
 .work-card .genre { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
 .work-card .title { font-family: var(--serif); font-size: 19px; line-height: 1.25; }
 .work-card .year { font-size: 12px; color: var(--muted); }
 .work-card .preview { font-family: var(--serif); font-size: 13px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-top: 4px; }
+/* фото-обложка карточки журнала: тянется на всю ширину карточки */
+.work-card-thumb {
+  width: calc(100% + 36px); margin: -18px -18px 8px; height: 148px;
+  object-fit: cover; object-position: center 22%;
+  border-bottom: 1px solid var(--line);
+  filter: grayscale(.55) contrast(1.02);
+}
+[data-theme="light"] .work-card-thumb { filter: none; }
+@media (max-width: 720px) { .work-card-thumb { height: 132px; } }
 
 /* ---------- catalog ---------- */
 
@@ -440,6 +449,21 @@ select, .select {
 
 .article-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 48px; padding: 24px 0 60px; }
 .prose { font-family: var(--serif); font-size: 18px; line-height: 1.75; color: var(--ink-soft); max-width: 68ch; }
+/* иллюстрация статьи: подпись с атрибуцией, портрет обтекается текстом */
+.lead-figure { margin: 6px 0 26px; width: fit-content; max-width: 100%; }
+.lead-figure img {
+  display: block; width: auto; height: auto;
+  max-width: 100%; max-height: 560px;
+  border: 1px solid var(--line); border-radius: 12px;
+  filter: grayscale(.5) contrast(1.02);
+}
+.lead-figure.is-portrait { float: left; width: min(290px, 42%); margin: 6px 26px 14px 0; }
+.lead-figure.is-portrait img { max-height: none; }
+.prose::after { content: ""; display: block; clear: both; }
+[data-theme="light"] .lead-figure img { filter: none; }
+.lead-figure figcaption { margin-top: 8px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+.lead-figure figcaption a { color: var(--muted); }
+@media (max-width: 560px) { .lead-figure.is-portrait { float: none; width: 100%; margin: 6px 0 18px; } }
 .prose h2 { font-size: 27px; margin: 1.6em 0 .5em; color: var(--ink); }
 .prose h3 { font-size: 21px; margin: 1.4em 0 .4em; color: var(--ink); }
 .prose p { margin: 0 0 1.1em; }

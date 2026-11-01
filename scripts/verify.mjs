@@ -5,6 +5,7 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join, extname } from 'node:path';
 import { existsSync } from 'node:fs';
+import { moscowToday } from './today.mjs';
 
 const DIST = 'dist';
 const strict = process.argv.includes('--strict');
@@ -177,9 +178,10 @@ else {
 // --- журнал (публикации) ---
 const pubDir = join('content', 'publications');
 if (existsSync(pubDir)) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = moscowToday();
   const files = (await readdir(pubDir)).filter((f) => f.endsWith('.md'));
   let published = 0;
+  const pubImages = new Map();
   for (const f of files) {
     const raw = await readFile(join(pubDir, f), 'utf-8');
     const title = raw.match(/^title:\s*"?([^"\n]+)"?\s*$/m)?.[1]?.trim();
@@ -197,6 +199,23 @@ if (existsSync(pubDir)) {
     // для читателя — признак недописанной редакционной правки.
     if (/\b(?:scripts\/[\w./-]+|npm run [\w:.-]+|reports\/[\w./-]+|data\/[\w-]+\.json|[\w-]+\.mjs)\b/.test(raw)) {
       errors.push(`публикация ${f}: разработчицкие пути/команды (scripts/, npm run, reports/, data/) в тексте для читателя`);
+    }
+    // Иллюстрация публикации: карточки журнала стоят рядом, поэтому картинки должны
+    // быть разными, а у картинки — полная атрибуция. Пока картинки нет — это
+    // предупреждение: журнал должен получить свою иллюстрацию к каждой публикации.
+    const fm = (name) => raw.match(new RegExp(`^${name}:\\s*"?([^"\\n]+)"?\\s*$`, 'm'))?.[1]?.trim() || '';
+    const pubImage = fm('image');
+    if (pubImage) {
+      if (!existsSync(join(DIST, pubImage.replace(/^\//, '')))) errors.push(`публикация ${f}: нет файла картинки ${pubImage}`);
+      if (!fm('imageAlt')) errors.push(`публикация ${f}: у картинки нет imageAlt`);
+      if (!fm('imageCaption') && !fm('imageAlt')) errors.push(`публикация ${f}: у картинки нет подписи`);
+      if (!/pd|public domain|cc0|cc by/i.test(fm('imageLicense'))) errors.push(`публикация ${f}: лицензия «${fm('imageLicense') || 'нет'}» — нужна свободная`);
+      if (!fm('imageSource').startsWith('https://commons.wikimedia.org/')) errors.push(`публикация ${f}: нет ссылки на файл Викисклада (imageSource)`);
+      const seen = pubImages.get(pubImage);
+      if (seen) errors.push(`публикация ${f}: картинка ${pubImage} уже стоит в публикации ${seen} — в журнале нужны разные`);
+      else pubImages.set(pubImage, f);
+    } else {
+      warnings.push(`публикация ${f}: нет иллюстрации (image) — у карточки журнала нет картинки`);
     }
     const page = join(DIST, 'publications', `${slug}.html`);
     const isFuture = /^\d{4}-\d{2}-\d{2}$/.test(date || '') && date > today;

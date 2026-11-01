@@ -4,6 +4,7 @@ import { join, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { buildSectionPages } from './sections.mjs';
 import { genreArt, researchArt, musicArt, filmArt, personArt } from './art.mjs';
+import { moscowToday } from './today.mjs';
 
 const ROOT = process.cwd();
 const DIST = join(ROOT, 'dist');
@@ -50,7 +51,7 @@ if (!A.lastName) A.lastName = A.name;
 const SITE = String(config.siteUrl || 'https://example.org').replace(/\/$/, '');
 const TEXTS_PD = config.textsPublicDomain !== false;
 const LANG = config.lang || 'ru';
-const UPDATED = config.updated || new Date().toISOString().slice(0, 10);
+const UPDATED = config.updated || moscowToday();
 const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 const MONTHS_NOM = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
 
@@ -821,7 +822,7 @@ for (const f of articleFiles) {
 articles.sort((a, b) => (a.kind === 'overview' ? -1 : 0) - (b.kind === 'overview' ? -1 : 0) || a.order - b.order);
 
 // ---------- Публикации (журнал): content/publications/*.md с датой в frontmatter ----------
-const TODAY = new Date().toISOString().slice(0, 10);
+const TODAY = moscowToday();
 const PUBLISH_ALL = process.env.PUBLISH_ALL === '1';
 const pubDir = join(ROOT, 'content', 'publications');
 let pubFiles = [];
@@ -1451,8 +1452,19 @@ for (const a of articles) {
 }
 
 // ---------- Журнал: индекс и страницы публикаций ----------
+function leadFigure(item, className = 'lead-figure') {
+  if (!item || !item.image) return '';
+  const caption = item.imageCaption || item.imageAlt || '';
+  const credit = [item.imageCredit, item.imageLicense].filter(Boolean).filter((c) => c !== 'Викисклад').join(' · ');
+  return `<figure class="${className}${item.imageShape === 'portrait' ? ' is-portrait' : ''}">
+    <img src="${esc(item.image)}" alt="${esc(item.imageAlt || caption)}"${item.imageW ? ` width="${Number(item.imageW)}"` : ''}${item.imageH ? ` height="${Number(item.imageH)}"` : ''} loading="lazy" decoding="async">
+    ${caption || credit ? `<figcaption>${esc(caption)}${credit ? ` · ${esc(credit)}` : ''}${item.imageSource ? ` · <a href="${esc(item.imageSource)}" rel="noopener external" target="_blank">Викисклад</a>` : ''}</figcaption>` : ''}
+  </figure>`;
+}
+
 function pubCard(p) {
-  return `<a class="work-card" href="/publications/${p.slug}.html">
+  return `<a class="work-card${p.image ? ' has-photo' : ''}" href="/publications/${p.slug}.html">
+    ${p.image ? `<img class="work-card-thumb" src="${esc(p.image)}" alt="${esc(p.imageAlt || p.title)}" loading="lazy" decoding="async">` : ''}
     <span class="genre">${esc(p.category || 'Публикация')} · ${esc(p.date.split('-').reverse().join('.'))}</span>
     <span class="title">${esc(p.title)}</span>
     <span class="preview">${esc(p.excerpt || '')}</span>
@@ -1470,6 +1482,7 @@ function pubPage(p) {
     <article>
       <h1 style="font-size:clamp(32px,5vw,48px);margin-bottom:14px">${esc(p.title)}</h1>
       <div class="meta-line"><span class="badge">${esc(p.category || 'Публикация')}</span><span>Опубликовано ${esc(dateLabel)}</span></div>
+      ${leadFigure(p)}
       <div class="prose">${p.html}</div>
       <div class="source-box"><b>Источники.</b> ${esc(p.sources || 'Даты, имена и обстоятельства сверены с академическими изданиями; перечень — в разделе «Источники».')} <a href="/sources.html">Смотреть «Источники»</a>.</div>
     </article>
