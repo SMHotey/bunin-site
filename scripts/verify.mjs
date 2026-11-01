@@ -319,7 +319,27 @@ for (const w of worksData) {
   if (/<\/?[a-zA-Z][^>]*>/.test(t)) errors.push(`works.json: ${w.slug} — сырые HTML-теги в тексте произведения`);
   if (/(?:^|\n)__\w+__/.test(t)) errors.push(`works.json: ${w.slug} — wiki-хелперы (__NOTOC__) в тексте`);
   if (/(?:^|\n)==+[^=\n]+==+\s*(?:\n|$)/.test(t)) errors.push(`works.json: ${w.slug} — wiki-заголовки «== … ==» в тексте`);
+  // Поле «первая публикация» показывается в карточке произведения: wiki-разметка
+  // и обрывки шаблонов там видны читателю как мусор.
+  if (/[=<>]|\{\{|\}\}|&nbsp;/.test(String(w.published || ''))) {
+    errors.push(`works.json: ${w.slug} — разметка в поле published: «${String(w.published).slice(0, 60)}»`);
+  }
 }
+// Годы жизни автора из конфига: «1870—1953». Год произведения за пределами этих
+// рамок — почти всегда год издания, случайно попавший в поле `year` при импорте.
+const lifeYears = String(config.author?.years || '').match(/(\d{4})\D+(\d{4})/);
+const bornYear = lifeYears ? Number(lifeYears[1]) : null;
+const diedYear = lifeYears ? Number(lifeYears[2]) : null;
+let noSource = 0;
+for (const w of worksData) {
+  const year = Number(w.year);
+  if (bornYear && diedYear && year) {
+    if (year > diedYear) errors.push(`works.json: ${w.slug} — год ${year} позже смерти автора (${diedYear}): в поле year должен быть год написания`);
+    if (year < bornYear) errors.push(`works.json: ${w.slug} — год ${year} раньше рождения автора (${bornYear})`);
+  }
+  if (!String(w.source || '').trim()) noSource += 1;
+}
+if (noSource) warnings.push(`works.json: у ${noSource} произведений не указано издание-источник (поле source)`);
 if (worksData.length) info.push(`произведений проверено: ${worksData.length}`);
 
 // --- служебные файлы ---
