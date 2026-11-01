@@ -89,6 +89,24 @@ function plain(html) {
 
 const words = (s) => plain(s).toLowerCase().replace(/ё/g, 'е').split(/[^a-zа-я0-9]+/i).filter(Boolean);
 
+// В библиотеке текст часто начинается с названия и номера части («АНТОНОВСКИЕ ЯБЛОКИ»,
+// «I»), а на странице Викитеки название стоит в шапке. Без снятия этих строк
+// выравнивание не находит начало и текст выглядит «не совпадающим с оригиналом».
+function stripLeadMarks(text, title) {
+  const lines = String(text || '').split('\n').map((l) => l.trim());
+  const norm = (s) => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9]/g, '');
+  const t = norm(title);
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line) { i += 1; continue; }
+    const n = norm(line);
+    if (n && (n === t || /^[ivx]+$/.test(n) || /^\d+$/.test(n))) { i += 1; continue; }
+    break;
+  }
+  return lines.slice(i).join('\n');
+}
+
 // Слова обвязки страницы (карточка «О тексте», примечания, категории): после конца
 // произведения их в оригинале много, и они не должны выглядеть как «продолжение».
 const JUNK = new Set(['примечания', 'примечание', 'источник', 'источники', 'литература', 'категория',
@@ -99,18 +117,21 @@ const JUNK = new Set(['примечания', 'примечание', 'исто�
 // Выравнивание с пропусками: оригиналу разрешаем «вставлять» до 4 слов (номера
 // строк, колонтитулы), нашему тексту — до 2, после чего требуем совпадения.
 function align(ours, theirs) {
-  const findBlock = (n) => {
-    if (ours.length < n) return -1;
-    const needle = ours.slice(0, n).join(' ');
-    const hay = theirs.join(' ');
+  const hay = theirs.join(' ');
+  const findBlock = (n, offset = 0) => {
+    if (ours.length < offset + n) return -1;
+    const needle = ours.slice(offset, offset + n).join(' ');
     const at = hay.indexOf(needle);
     if (at < 0) return -1;
     return hay.slice(0, at).split(' ').filter(Boolean).length;
   };
-  let j = findBlock(8);
-  if (j < 0) j = findBlock(5);
-  if (j < 0) j = findBlock(3);
-  let i = 0;
+  let j = -1;
+  let startOffset = 0;
+  for (const [n, offset] of [[8, 0], [6, 0], [4, 0], [4, 1], [4, 2], [4, 3]]) {
+    j = findBlock(n, offset);
+    if (j >= 0) { startOffset = offset; break; }
+  }
+  let i = startOffset;
   let matched = 0;
   while (i < ours.length && j < theirs.length && j >= 0) {
     if (ours[i] === theirs[j]) { matched += 1; i += 1; j += 1; continue; }
@@ -130,7 +151,7 @@ function align(ours, theirs) {
   const tail = rest.filter((w) => w.length > 2 && !/^\d+$/.test(w) && !JUNK.has(w));
   return {
     found: j >= 0,
-    covered: ours.length ? +(matched / ours.length).toFixed(3) : 0,
+    covered: ours.length > startOffset ? +(matched / (ours.length - startOffset)).toFixed(3) : 0,
     tailWords: tail.length,
     tailSample: tail.slice(0, 12).join(' '),
   };
@@ -142,8 +163,8 @@ async function fetchOriginal(sourceUrl) {
   if (!m) return { error: 'не Викитека' };
   const title = decodeURIComponent(m[1]).replace(/_/g, ' ');
   const url = 'https://ru.wikisource.org/w/api.php?action=parse&format=json&formatversion=2&prop=text'
-    + '&page=' + encodeURIComponent(title);
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+    + '&redirects=1&page=' + encodeURIComponent(title);
+  for (let attempt = 0; attempt < 4; attempt += 1) {
     const res = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(45000) });
     const raw = await res.text();
     if (raw.trimStart().startsWith('{')) {
@@ -151,7 +172,7 @@ async function fetchOriginal(sourceUrl) {
       if (data.error) return { error: data.error.code || 'ошибка API', title };
       return { title, html: data.parse?.text || '' };
     }
-    if (/too many requests|429/i.test(raw)) { await sleep(8000 * (attempt + 1)); continue; }
+    if (/too many requests|429/i.test(raw)) { await sleep(12000 * (attempt + 1)); continue; }
     return { error: raw.slice(0, 120), title };
   }
   return { error: 'не удалось получить страницу (лимит запросов)', title };
@@ -171,7 +192,7 @@ console.log(`к сверке: ${queue.length} (уже проверено: ${Obje
 
 let done = 0;
 for (const w of queue) {
-  const ours = words(w.text);
+  const ours = words(stripLeadMarks(w.text, w.title));
   let row;
   try {
     const orig = await fetchOriginal(w.sourceUrl);
@@ -180,7 +201,7 @@ for (const w of queue) {
     } else {
       // Латиница в оригинале — это остатки разметки (output, parser, linenum, n00),
       // в русском тексте Бунина её нет. Убираем, иначе выравнивание рвётся.
-      const theirs = words(orig.html).filter((w) => !/^[a-z]+[0-9]*$/.test(w));
+      const theirs = words(stripLeadMarks(orig.html, w.title)).filter((w) => !/^[a-z]+[0-9]*$/.test(w));
       const ratio = theirs.length ? +(ours.length / theirs.length).toFixed(3) : null;
       const a = align(ours, theirs);
       let status = 'ok';
