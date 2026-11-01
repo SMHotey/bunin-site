@@ -128,6 +128,21 @@ function modernizeOrthography(t) {
     .replace(/(\p{L})ъ(?=[\s\p{P}]|$)/gu, '$1');
 }
 
+// Подпись под текстом на Викитеке («|1886—1889», «|28 марта 1886») приезжает
+// в текст строкой, начинающейся с вертикальной черты. В стихотворении такой
+// строки быть не может, а читателю она видна как мусор в конце текста.
+function stripTrailingDatelines(text) {
+  const lines = String(text || '').split('\n');
+  let end = lines.length;
+  while (end > 0) {
+    const line = lines[end - 1] || '';
+    if (!line.trim()) { end -= 1; continue; }
+    if (/^\s*\|/.test(line)) { end -= 1; continue; }
+    break;
+  }
+  return lines.slice(0, end).join('\n').trim();
+}
+
 // Очистка отрендерённого HTML подстраницы djvu-редакции.
 function cleanRenderedHtml(html) {
   let h = html;
@@ -229,7 +244,7 @@ async function main() {
 
     if (!text || text.length < 100) { console.warn('short', meta.title, text?.length); continue; }
     // убрать служебные хвосты викитеки
-    text = text.replace(/\{\{[^{}]*\}\}/g, '').trim();
+    text = stripTrailingDatelines(text.replace(/\{\{[^{}]*\}\}/g, ''));
     // ранние djvu-тексты в дореформенной орфографии — привести к современной
     // (триггер — ѣ/ѳ или твёрдый знак в конце слова; украинские «і» в диалектных репликах не трогаем)
     if (/[ѣѳ]/.test(text) || /\p{L}ъ(?=[\s\p{P}]|$)/u.test(text)) text = modernizeOrthography(text);
