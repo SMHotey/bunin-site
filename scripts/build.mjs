@@ -862,6 +862,7 @@ function articlePage(a) {
     <article>
       <h1 style="font-size:clamp(32px,5vw,48px);margin-bottom:14px">${esc(a.title)}</h1>
       <div class="meta-line"><span class="badge">${a.kind === 'overview' ? 'обзор' : 'статья о жизни'}</span><span>Обновлено ${esc(UPDATED_LABEL)}</span></div>
+      ${leadFigure(a)}
       <div class="prose">${a.html}</div>
       <div class="source-box"><b>Источники и аппарат.</b> Полный перечень — в разделе <a href="/sources.html">«Источники»</a>. Оценки и версии, по которым в литературе нет согласия, разобраны в разделе <a href="/versions.html">«Версии»</a>.</div>
     </article>

@@ -175,13 +175,26 @@ else {
   if (!feed.includes(SITE)) errors.push('feed.xml: ссылки не на боевой домен');
 }
 
-// --- журнал (публикации) ---
+// --- журнал (публикации) и статьи биографии ---
+// Картинка — одна на сайт: и в журнале, и в статьях биографии каждая илл. уникальна.
+const editorialImages = new Map();
+const checkEditorialImage = (label, f, fm, section) => {
+  const image = fm('image');
+  if (!image) return false;
+  if (!existsSync(join(DIST, image.replace(/^\//, '')))) errors.push(`${label}: нет файла картинки ${image}`);
+  if (!fm('imageAlt')) errors.push(`${label}: у картинки нет imageAlt`);
+  if (!/pd|public domain|cc0|cc by/i.test(fm('imageLicense'))) errors.push(`${label}: лицензия «${fm('imageLicense') || 'нет'}» — нужна свободная`);
+  if (!String(fm('imageSource')).startsWith('https://commons.wikimedia.org/')) errors.push(`${label}: нет ссылки на файл Викисклада (imageSource)`);
+  const seen = editorialImages.get(image);
+  if (seen) errors.push(`${label}: картинка ${image} уже стоит в ${seen} — повторы в журнале и статьях не нужны`);
+  else editorialImages.set(image, `${section} ${f}`);
+  return true;
+};
 const pubDir = join('content', 'publications');
 if (existsSync(pubDir)) {
   const today = moscowToday();
   const files = (await readdir(pubDir)).filter((f) => f.endsWith('.md'));
   let published = 0;
-  const pubImages = new Map();
   for (const f of files) {
     const raw = await readFile(join(pubDir, f), 'utf-8');
     const title = raw.match(/^title:\s*"?([^"\n]+)"?\s*$/m)?.[1]?.trim();
@@ -204,17 +217,7 @@ if (existsSync(pubDir)) {
     // быть разными, а у картинки — полная атрибуция. Пока картинки нет — это
     // предупреждение: журнал должен получить свою иллюстрацию к каждой публикации.
     const fm = (name) => raw.match(new RegExp(`^${name}:\\s*"?([^"\\n]+)"?\\s*$`, 'm'))?.[1]?.trim() || '';
-    const pubImage = fm('image');
-    if (pubImage) {
-      if (!existsSync(join(DIST, pubImage.replace(/^\//, '')))) errors.push(`публикация ${f}: нет файла картинки ${pubImage}`);
-      if (!fm('imageAlt')) errors.push(`публикация ${f}: у картинки нет imageAlt`);
-      if (!fm('imageCaption') && !fm('imageAlt')) errors.push(`публикация ${f}: у картинки нет подписи`);
-      if (!/pd|public domain|cc0|cc by/i.test(fm('imageLicense'))) errors.push(`публикация ${f}: лицензия «${fm('imageLicense') || 'нет'}» — нужна свободная`);
-      if (!fm('imageSource').startsWith('https://commons.wikimedia.org/')) errors.push(`публикация ${f}: нет ссылки на файл Викисклада (imageSource)`);
-      const seen = pubImages.get(pubImage);
-      if (seen) errors.push(`публикация ${f}: картинка ${pubImage} уже стоит в публикации ${seen} — в журнале нужны разные`);
-      else pubImages.set(pubImage, f);
-    } else {
+    if (!checkEditorialImage(`публикация ${f}`, f, fm, 'публикация')) {
       warnings.push(`публикация ${f}: нет иллюстрации (image) — у карточки журнала нет картинки`);
     }
     const page = join(DIST, 'publications', `${slug}.html`);
@@ -228,6 +231,24 @@ if (existsSync(pubDir)) {
   }
   if (!existsSync(join(DIST, 'publications', 'index.html'))) errors.push('нет index.html журнала');
   if (!sitemap.includes('/publications/')) errors.push('карта сайта: нет журнала');
+}
+
+// --- статьи биографии (content/*.md) ---
+// У статьи о жизни — та же илл. и та же атрибуция, что у публикации: раздел читают
+// подряд, и повтор картинки из журнала здесь сразу заметен.
+{
+  const contentDir = join('content');
+  const files = (await readdir(contentDir)).filter((f) => f.endsWith('.md'));
+  let withPhoto = 0;
+  for (const f of files) {
+    const raw = await readFile(join(contentDir, f), 'utf-8');
+    const fm = (name) => raw.match(new RegExp(`^${name}:\\s*"?([^"\\n]+)"?\\s*$`, 'm'))?.[1]?.trim() || '';
+    if (!fm('title')) errors.push(`статья ${f}: нет title`);
+    if (!fm('slug')) errors.push(`статья ${f}: нет slug`);
+    if (checkEditorialImage(`статья ${f}`, f, fm, 'статья')) withPhoto += 1;
+    else warnings.push(`статья ${f}: нет иллюстрации (image) — у статьи биографии нет картинки`);
+  }
+  if (withPhoto) info.push(`статьи биографии с картинкой: ${withPhoto} из ${files.length}`);
 }
 
 // --- поиск ---

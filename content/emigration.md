@@ -4,6 +4,15 @@ slug: emigration
 kind: period
 order: 4
 excerpt: "Полтора года в Одессе, тридцать лет во Франции, Нобелевская премия 1933 года и парижская смерть в 1953-м."
+image: "/img/journal/bio-bunin-1937.jpg"
+imageAlt: "Иван Бунин, ноябрь 1937 года"
+imageCaption: "Иван Бунин. Ноябрь 1937 года, эмиграция"
+imageCredit: "Викисклад"
+imageLicense: "Public domain"
+imageSource: "https://commons.wikimedia.org/wiki/File:Bunin%20Ivan%201937.jpg"
+imageW: "1000"
+imageH: "1335"
+imageShape: "portrait"
 ---
 
 ## Одесса и пароход «Спарта»

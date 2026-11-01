@@ -4,6 +4,15 @@ slug: moscow-years
 kind: period
 order: 3
 excerpt: "Литературный кружок «Среда», «Листопад», две Пушкинские премии, академия и проза, сделавшая Бунина классиком."
+image: "/img/journal/bio-sreda-1902.jpg"
+imageAlt: "Участники литературной группы «Среда», 1902: Скиталец, Андреев, Горький, Телешов, Шаляпин, Бунин"
+imageCaption: "«Среда», 1902: Скиталец, Леонид Андреев, Горький, Телешов, Шаляпин, Бунин"
+imageCredit: "Викисклад"
+imageLicense: "Public domain"
+imageSource: "https://commons.wikimedia.org/wiki/File:WednesdayGroup.jpg"
+imageW: "1000"
+imageH: "765"
+imageShape: "landscape"
 ---
 
 ## Кружок «Среда»
