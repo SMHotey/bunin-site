@@ -20,7 +20,8 @@
     "dev": "npm run build && npm run serve",
     "clean:sources": "node scripts/normalize-sources.mjs",
     "indexnow": "node scripts/indexnow.mjs",
-    "audit:texts": "node scripts/text-audit.mjs"
+    "audit:texts": "node scripts/text-audit.mjs",
+    "queue:status": "node scripts/queue-status.mjs"
   },
   "engines": {
     "node": ">=20"
