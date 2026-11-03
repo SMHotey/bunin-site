@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-01",
+  "generatedAt": "2026-11-03",
   "sections": {
-    "structure": "2026-11-01",
+    "structure": "2026-11-02",
     "works": "2026-11-01",
     "people": "2026-10-23",
-    "timeline": "2026-10-30",
-    "biography": "2026-11-01",
-    "publications": "2026-11-01",
+    "timeline": "2026-11-02",
+    "biography": "2026-11-02",
+    "publications": "2026-11-02",
     "places": "2026-10-30",
     "legacy": "2026-10-30",
     "books": "2026-11-01",
@@ -24,7 +24,10 @@
     "content/publications/okayannye-dni.md": "2026-11-01",
     "content/publications/slovo-v-lirike.md": "2026-11-01",
     "content/publications/stroka-v-pyat-slov.md": "2026-11-01",
-    "content/publications/temnye-allei.md": "2026-11-01"
+    "content/publications/temnye-allei.md": "2026-11-01",
+    "content/publications/voronezh-dom-1870.md": "2026-11-02",
+    "content/publications/derevenskiy-nishchiy-1887.md": "2026-11-02",
+    "content/publications/listopad-1900.md": "2026-11-02"
   },
   "note": "Даты последнего изменения по разделам. Обновляется скриптом scripts/last-updated.mjs из истории git; в CI без истории используется этот файл."
 }

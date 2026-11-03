@@ -21,10 +21,16 @@ const dry = process.argv.includes('--dry');
 const raw = JSON.parse(await readFile(FILE, 'utf8'));
 const works = Array.isArray(raw) ? raw : raw.works;
 
+// Интервики-хвосты («sr:Црни човек», «en:The Black Man») — остаток разметки
+// Викитеки, а не текст произведения. Снимаем их до чистки подписей, иначе
+// подпись-дата оказывается не последней строкой и остаётся в тексте.
+const INTERWIKI = /^[a-z]{2,3}:[^\n]*$/gim;
+
 let touched = 0;
 const samples = [];
 for (const w of works) {
-  const before = String(w.text || '');
+  const original = String(w.text || '');
+  const before = original.replace(INTERWIKI, '').replace(/\n{3,}/g, '\n\n').trim();
   const lines = before.split('\n');
   let end = lines.length;
   while (end > 0) {
@@ -33,7 +39,7 @@ for (const w of works) {
     if (/^\s*\|/.test(line)) { end -= 1; continue; }
     break;
   }
-  if (end === lines.length) continue;
+  if (before === original && end === lines.length) continue;
   touched += 1;
   const cut = lines.slice(end).filter((l) => l.trim()).join(' ');
   if (samples.length < 10) samples.push(`${w.title} — снято: ${JSON.stringify(cut)}`);
