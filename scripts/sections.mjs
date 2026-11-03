@@ -5,6 +5,21 @@
 
 import { musicArt, filmArt, topicArt } from './art.mjs';
 
+
+// Карточка музея/памятника с фото. Правило вёрстки: портретное («книжное») фото
+// занимает левую треть карточки, текст идёт справа; альбомное — как раньше, обтеканием.
+const memoryCard = (m, body, esc) => {
+  if (!m.photo) return `<div class="panel" style="margin-bottom:14px">${body}</div>`;
+  const figure = `<figure class="card-photo${m.portrait ? ' card-photo--portrait' : ''}">
+    <img src="${esc(m.photo)}" alt="${esc(m.photoAlt || m.name)}" loading="lazy"${m.portrait ? '' : ' width="640" height="420"'}>
+    <figcaption>${esc(m.photoCredit || 'Фото: Wikimedia Commons')}</figcaption>
+  </figure>`;
+  if (m.portrait) {
+    return `<div class="panel panel--portrait" style="margin-bottom:14px">${figure}<div class="panel-body">${body}</div></div>`;
+  }
+  return `<div class="panel" style="margin-bottom:14px">${body.replace('<h3', figure + '<h3')}</div>`;
+};
+
 export function buildSectionPages(ctx) {
   const {
     A, SITE, LANG, UPDATED, UPDATED_LABEL, esc, plural, norm, crumbs, workUrl,
@@ -287,24 +302,22 @@ export function buildSectionPages(ctx) {
 </div>
 <div class="wrap" style="padding-bottom:40px">
   <h2 style="font-size:26px;margin-bottom:14px">Музеи</h2>
-  ${museums.map((m) => `<div class="panel" style="margin-bottom:14px">
+  ${museums.map((m) => memoryCard(m, `
     <div class="meta-line"><span class="badge">${esc(m.place)}</span>${m.founded ? `<span>${esc(m.founded)}</span>` : ''}</div>
     <h3 style="font-size:22px">${esc(m.name)}</h3>
-    ${m.photo ? `<figure class="card-photo"><img src="${esc(m.photo)}" alt="${esc(m.photoAlt || m.name)}" loading="lazy" width="640" height="420"><figcaption>${esc(m.photoCredit || 'Фото: Wikimedia Commons')}</figcaption></figure>` : ''}
     ${m.address ? `<p style="font-size:13px;color:var(--muted);margin:0 0 8px">${esc(m.address)}</p>` : ''}
     <p style="color:var(--ink-soft);max-width:72ch">${esc(m.about)}</p>
     ${m.url ? `<p style="margin:8px 0 0"><a href="${esc(m.url)}" rel="noopener external" target="_blank">${esc(m.urlLabel || 'Официальный сайт')} <span aria-hidden="true">↗</span></a></p>` : ''}
     <div class="tag-row">${(m.what || []).map((x) => `<span class="tag">${esc(x)}</span>`).join('')}</div>
     ${m.note ? `<p style="font-size:13px;color:var(--muted);margin:10px 0 0">${esc(m.note)}</p>` : ''}
-  </div>`).join('')}
+  `, esc)).join('')}
   <h2 style="font-size:26px;margin:34px 0 14px">Памятники и могила</h2>
-  ${monuments.map((m) => `<div class="panel" style="margin-bottom:14px">
+  ${monuments.map((m) => memoryCard(m, `
     <div class="meta-line"><span class="badge">${esc(m.place)}</span>${m.year ? `<span>${esc(m.year)}</span>` : ''}</div>
     <h3 style="font-size:22px">${esc(m.name)}</h3>
-    ${m.photo ? `<figure class="card-photo"><img src="${esc(m.photo)}" alt="${esc(m.photoAlt || m.name)}" loading="lazy" width="640" height="420"><figcaption>${esc(m.photoCredit || 'Фото: Wikimedia Commons')}</figcaption></figure>` : ''}
     <p style="color:var(--ink-soft);max-width:72ch">${esc(m.about)}</p>
     ${m.note ? `<p style="font-size:13px;color:var(--muted);margin:0">${esc(m.note)}</p>` : ''}
-  </div>`).join('')}
+  `, esc)).join('')}
   <div class="prose" style="margin-top:30px">
     <h2>Как память становится инфраструктурой</h2>
     <p>Бунинские места работают не по отдельности, а как сеть: воронежский музей занимает дом, где писатель родился; орловский и елецкий — те города, где прошли гимназические годы и куда он возвращался в письмах; ефремовский дом-музей держит усадебный быт тургеневской эпохи. Памятники ставят на площадях и бульварах, а могила на кладбище Сент-Женевьев-де-Буа замыкает маршрут за границей. Для читателя это удобно: биография перестаёт быть текстом и становится картой.</p>

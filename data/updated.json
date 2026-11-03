@@ -6,7 +6,7 @@
     "people": "2026-10-23",
     "timeline": "2026-11-02",
     "biography": "2026-11-02",
-    "publications": "2026-11-02",
+    "publications": "2026-11-03",
     "places": "2026-10-30",
     "legacy": "2026-10-30",
     "books": "2026-11-01",
@@ -27,7 +27,9 @@
     "content/publications/temnye-allei.md": "2026-11-01",
     "content/publications/voronezh-dom-1870.md": "2026-11-02",
     "content/publications/derevenskiy-nishchiy-1887.md": "2026-11-02",
-    "content/publications/listopad-1900.md": "2026-11-02"
+    "content/publications/listopad-1900.md": "2026-11-02",
+    "content/publications/posledniy-shmel-1916.md": "2026-11-03",
+    "content/publications/vecher-1909.md": "2026-11-03"
   },
   "note": "Даты последнего изменения по разделам. Обновляется скриптом scripts/last-updated.mjs из истории git; в CI без истории используется этот файл."
 }

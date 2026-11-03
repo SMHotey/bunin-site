@@ -1,5 +1,5 @@
 import { readFile, writeFile, mkdir, cp, rm, readdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { buildSectionPages } from './sections.mjs';
@@ -148,6 +148,61 @@ const books = await readJson('data/books.json', []);
 const places = await readJson('data/places.json', []);
 const museums = await readJson('data/museums.json', []);
 const monuments = await readJson('data/monuments.json', []);
+
+// Размер картинки из файла: нужен, чтобы отличать альбомные фото от «книжных» (портретных).
+// Для портретных карточка перестраивается: фото в левую треть, текст справа — иначе
+// горизонтальный кроп режет вертикальный снимок в полосу.
+function imageSize(publicPath) {
+  if (!publicPath) return null;
+  const file = join(ROOT, 'public', String(publicPath).replace(/^\//, ''));
+  if (!existsSync(file)) return null;
+  try {
+    const b = readFileSync(file);
+    // JPEG
+    if (b[0] === 0xff && b[1] === 0xd8) {
+      let i = 2;
+      while (i < b.length - 9) {
+        if (b[i] !== 0xff) { i += 1; continue; }
+        const marker = b[i + 1];
+        if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+          return { w: b.readUInt16BE(i + 7), h: b.readUInt16BE(i + 5) };
+        }
+        i += 2 + b.readUInt16BE(i + 2);
+      }
+      return null;
+    }
+    // PNG
+    if (b[0] === 0x89 && b[1] === 0x50) return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+    // WebP (VP8X/VP8/VP8L)
+    if (b.toString('ascii', 0, 4) === 'RIFF' && b.toString('ascii', 8, 12) === 'WEBP') {
+      const chunk = b.toString('ascii', 12, 16);
+      if (chunk === 'VP8X') return { w: 1 + b.readUIntLE(24, 3), h: 1 + b.readUIntLE(27, 3) };
+      if (chunk === 'VP8 ') return { w: b.readUInt16LE(26) & 0x3fff, h: b.readUInt16LE(28) & 0x3fff };
+      if (chunk === 'VP8L') {
+        const bits = b.readUInt32LE(21);
+        return { w: (bits & 0x3fff) + 1, h: ((bits >> 14) & 0x3fff) + 1 };
+      }
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+// Портретное («книжное») фото: выше, чем шире. Допуск 5% — почти квадратные считаем альбомными.
+function markPhotoShape(item) {
+  if (!item || !item.photo) return item;
+  const s = imageSize(item.photo);
+  if (s) {
+    item.photoW = s.w;
+    item.photoH = s.h;
+    item.portrait = s.h > s.w * 1.05;
+  }
+  return item;
+}
+for (const m of museums) markPhotoShape(m);
+for (const m of monuments) markPhotoShape(m);
+
 const music = await readJson('data/music.json', { items: [] });
 const films = await readJson('data/films.json', { items: [] });
 const languages = await readJson('data/languages.json', { languages: [] });
