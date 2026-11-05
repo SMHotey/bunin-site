@@ -920,6 +920,13 @@ select, .select {
   .error-grid { gap: 28px; }
 }
 
+/* Десять пунктов меню: на 901–1080 px держим их в одну строку, иначе шапка прыгает. */
+@media (max-width: 1080px) and (min-width: 901px) {
+  .main-nav { flex-wrap: nowrap; }
+  .main-nav a { font-size: 12.5px; padding: 8px 5px; }
+  .header-inner { gap: 14px; }
+}
+
 @media (max-width: 900px) {
   .error-grid { grid-template-columns: 1fr; min-height: 0; padding-top: 10px; }
   .error-art { order: 2; max-width: 620px; }

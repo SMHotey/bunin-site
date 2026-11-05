@@ -14,6 +14,9 @@ Thumbs.db
 # артефакты анализа корпуса (как у Есенина)
 reports/
 
+# секреты локальной работы (API-ключ AdvCake), в git не попадают
+.secrets/
+
 # состояние отправки в IndexNow (локальный кэш scripts/indexnow.mjs)
 .cache/
 # временные файлы research-сессий
@@ -25,3 +28,7 @@ affiliate_links.json
 affiliate_validation.json
 scripts/__pycache__/
 scratch/
+# состояние и секреты конвейера
+.pipeline/state/
+.pipeline/.env
+.pipeline/roles-backup/

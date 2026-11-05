@@ -13,6 +13,7 @@
     "build": "node scripts/build.mjs",
     "check": "node scripts/check-links.mjs",
     "sync:prices": "node scripts/sync-prices.mjs",
+    "import:audiobooks": "python scripts/import-audiobooks.py",
     "verify": "npm run build && npm run check && npm run audit:texts && node scripts/verify.mjs",
     "verify:strict": "npm run build && npm run check && node scripts/text-audit.mjs --strict && node scripts/verify.mjs --strict",
     "serve": "node scripts/serve.mjs",

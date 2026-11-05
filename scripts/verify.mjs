@@ -338,6 +338,57 @@ for (const b of books) {
   }
 }
 
+
+// --- аудиокниги (ЛитРес, партнёрская программа AdvCake) ---
+const audiobooks = await readJson('data/audiobooks.json');
+if (!audiobooks.length) warnings.push('data/audiobooks.json пуст — раздел «Аудиокниги» покажет заглушку');
+const audioHtml = await readFile(join(DIST, 'audiobooks/index.html'), 'utf8');
+if (audiobooks.length && !locs.some((l) => l.endsWith('/audiobooks/'))) errors.push('sitemap: нет раздела аудиокниг');
+for (const b of audiobooks) {
+  if (!b.title || !b.annotation) errors.push(`audiobooks.json: у ${b.id || '?'} нет title/annotation`);
+  if (!b.durationMinutes) errors.push(`audiobooks.json: у ${b.id || '?'} нет длительности`);
+  if (!(b.readers || []).length) errors.push(`audiobooks.json: у ${b.id || '?'} нет чтеца`);
+  for (const l of b.links || []) {
+    if (!/^https:\/\//.test(l.url || '')) errors.push(`audiobooks.json: ${b.id} — ссылка не https`);
+    if (l.store !== 'litres') errors.push(`audiobooks.json: ${b.id} — неожиданный магазин ${l.store}`);
+  }
+}
+// Один товар — одна карточка: дубли по productId ломают и вёрстку, и аналитику.
+const audioIds = new Set();
+for (const b of audiobooks) {
+  if (audioIds.has(b.productId)) errors.push(`audiobooks.json: товар ${b.productId} встречается дважды`);
+  audioIds.add(b.productId);
+}
+if (audiobooks.length) {
+  const cardsInHtml = (audioHtml.match(/class="book-card"/g) || []).length;
+  if (cardsInHtml !== audiobooks.length) errors.push(`аудиокниги: на странице ${cardsInHtml} карточек, в данных ${audiobooks.length}`);
+  if (!audioHtml.includes('rel="sponsored')) errors.push('аудиокниги: у ссылок нет rel="sponsored"');
+  const litresAdv = config.affiliate?.stores?.litres?.advertiser || {};
+  const hasAudioAdLinks = audioHtml.includes('erid:');
+  if (hasAudioAdLinks) {
+    if (!litresAdv.name) errors.push('аудиокниги: у магазина litres не задан advertiser для маркировки');
+    else {
+      const required = `Реклама. Рекламодатель ${litresAdv.name}${litresAdv.ogrn ? `, ОГРН ${litresAdv.ogrn}` : ''}${litresAdv.inn ? `, ИНН ${litresAdv.inn}` : ''}.`;
+      if (!audioHtml.includes(required)) errors.push(`аудиокниги: нет обязательной маркировки «${required}»`);
+    }
+  }
+  // Цены аудиокниг не публикуются и не собираются: в данных их просто нет.
+  if (audioHtml.includes('class="book-price"') || audioHtml.includes('bp-value')) errors.push('аудиокниги: на странице появилась цена');
+  for (const b of audiobooks) {
+    for (const key of ['cover', 'coverWebp']) {
+      if (!b[key]) continue;
+      const f = join(DIST, b[key].replace(/^\//, ''));
+      if (!existsSync(f)) errors.push(`аудиокниги: ${b.id} — файл обложки ${b[key]} не попал в dist/`);
+      else if ((await stat(f)).size < 1024) errors.push(`аудиокниги: ${b.id} — обложка ${b[key]} подозрительно мала`);
+    }
+    for (const l of b.links || []) {
+      const erid = (String(l.url).match(/[?&]erid=([^&]+)/i) || [])[1];
+      if (!erid) errors.push(`аудиокниги: ${b.id} — в партнёрской ссылке нет erid`);
+      else if (!audioHtml.includes(`erid: ${decodeURIComponent(erid)}`)) errors.push(`аудиокниги: у ${b.id} erid не выведен на странице`);
+    }
+  }
+}
+
 // --- тексты произведений ---
 // Импорт с Викитеки оставлял <ref> в параметрах шаблонов, «== 1 ==» и __NOTOC__ —
 // на странице это мусор. Гейт, чтобы чистка не откатилась при следующем импорте.
