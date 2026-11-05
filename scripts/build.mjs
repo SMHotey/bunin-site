@@ -806,7 +806,7 @@ const home = `
 <section class="section">
   <div class="wrap">
     <div class="section-head">
-      <div><h2>Стихи по темам</h2><p>${topics.length} подборок: природа, Родина, деревня, любовь, город, смерть, Кавказ, революция.</p></div>
+      <div><h2>Стихи по темам</h2><p>${topics.length} ${plural(topics.length, ['подборка', 'подборки', 'подборок'])}: природа, любовь, Родина и изгнание, деревня, море, ночной свет.</p></div>
       <a class="section-link" href="/topics/">Все подборки →</a>
     </div>
     <div class="tag-row" style="gap:8px">
