@@ -40,12 +40,23 @@ for (const [href, from] of [...missing].slice(0, 25)) {
 }
 
 // ---------- внешние ссылки ----------
-// Проверяем те, что мы сами разместили (обратные ссылки на музеи, источники, вики).
-// Пропускаем: источники текстов (викитека — проверена при импорте), поисковые ссылки магазинов
-// (генерируются из названий) и query-параметры. Ошибки — только явные 404/410/5xx;
-// таймауты, 403 антиботов и DNS-сбои — предупреждения, чтобы сеть не ломала сборку.
-const SKIP_DOMAINS = ['ru.wikisource.org', 'poet-bunin.ru', 'localhost', 'mc.yandex.ru', 'www.googletagmanager.com'];
+// Проверяем всё, что мы сами разместили (музеи, источники, вики, справочники), — без выборки:
+// именно выборка пропускала мёртвые партнёрские ссылки. Партнёрские (с erid/partnerId) здесь
+// исключены намеренно: их отдельно и строже проверяет scripts/check-affiliate.mjs.
+// Ошибки — только явные 404/410/5xx; таймауты, 403 антиботов и DNS-сбои — предупреждения,
+// чтобы сеть не ломала сборку.
+let selfHost = '';
+try {
+  const cfg = JSON.parse(await readFile('site.config.json', 'utf8'));
+  if (cfg.siteUrl) selfHost = new URL(cfg.siteUrl).hostname;
+} catch { /* конфига нет — просто не исключаем свой домен */ }
+
+const SKIP_DOMAINS = new Set([
+  'ru.wikisource.org', 'localhost', 'mc.yandex.ru', 'www.googletagmanager.com',
+  ...(selfHost ? [selfHost, `www.${selfHost}`] : []),
+]);
 const SEARCH_RE = /[?&](query|q|text|phrase|search)=/;
+const AFFILIATE_RE = /[?&](erid|partnerId|utm_source=advcake)=/i;
 
 const ext = new Set();
 for (const file of files) {
@@ -54,13 +65,13 @@ for (const file of files) {
     const url = m[1];
     let host = '';
     try { host = new URL(url).hostname; } catch { continue; }
-    if (SKIP_DOMAINS.includes(host) || SEARCH_RE.test(url)) continue;
+    if (SKIP_DOMAINS.has(host) || SEARCH_RE.test(url) || AFFILIATE_RE.test(url)) continue;
     ext.add(url);
   }
 }
 
-const EXTERNAL_LIMIT = Number(process.env.EXT_LINKS_LIMIT || 120);
-const batch = [...ext].slice(0, EXTERNAL_LIMIT);
+const EXTERNAL_LIMIT = Number(process.env.EXT_LINKS_LIMIT || 0); // 0 — проверяем все
+const batch = EXTERNAL_LIMIT > 0 ? [...ext].slice(0, EXTERNAL_LIMIT) : [...ext];
 const results = { ok: 0, err: [], warn: [] };
 
 async function checkUrl(u) {
@@ -68,7 +79,7 @@ async function checkUrl(u) {
     const ctl = new AbortController();
     const t = setTimeout(() => ctl.abort(), 12000);
     const res = await fetch(u, { method: 'GET', redirect: 'follow', signal: ctl.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BuninSiteLinkCheck/1.0)' } });
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AuthorSiteLinkCheck/1.0)' } });
     clearTimeout(t);
     if (res.status >= 500) return { u, kind: 'err', why: `HTTP ${res.status}` };
     if (res.status === 404 || res.status === 410) return { u, kind: 'err', why: `HTTP ${res.status}` };
