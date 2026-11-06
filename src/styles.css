@@ -1001,14 +1001,18 @@ select, .select {
 
 @media print {
   .site-header, .site-footer, .poem-tools, .hero-actions, .search-dialog { display: none !important; }
-  .desk-art, .error-art, .print-cta, .chip, .tag-row, .related, .crumbs, .meta-line { display: none !important; }
+  /* На бумагу — только произведение: название, текст и строка об авторстве.
+     Всё остальное (темы, «Похожие произведения», переходы по соседним текстам,
+     источник, призыв к печати) выключено, иначе примирительная вёрстка тянет
+     на второй лист обвязку сайта. */
+  .desk-art, .error-art, .print-cta, .chip, .tag-row, .related, .related-works,
+  .work-nav, .crumbs, .meta-line, .source-box, .aside-card, .skip-link { display: none !important; }
   .print-only { display: block !important; }
   body { background: #fff; color: #000; }
   .poem { font-size: 14pt; line-height: 1.6; white-space: pre-wrap; }
   .poem-page { padding-top: 0 !important; }
   .poem-title { font-size: 20pt; margin: 0 0 12pt; }
   a { color: #000; text-decoration: none; }
-  .source-box { border-color: #999; font-size: 10pt; }
   @page { margin: 18mm 20mm; }
 }
 
