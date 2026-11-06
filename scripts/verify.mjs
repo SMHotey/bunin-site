@@ -428,6 +428,188 @@ for (const w of worksData) {
 if (noSource) warnings.push(`works.json: у ${noSource} произведений не указано издание-источник (поле source)`);
 if (worksData.length) info.push(`произведений проверено: ${worksData.length}`);
 
+// --- книжный вид: разметка прозы (перенос из esenin-dashboard) ---
+// V1. Охват задан конфигом, а не кодом: без genres/minChars книгу не собрать.
+const bookCfg = config.reader?.book || {};
+if (bookCfg.available !== true) {
+  errors.push('site.config.json: reader.book.available не включён — книжного режима нет');
+}
+if (!Array.isArray(bookCfg.genres) || !bookCfg.genres.length || !(Number(bookCfg.minChars) > 0)) {
+  errors.push('site.config.json: нет reader.book.genres/minChars');
+}
+// V2. Отбор по конфигу: 36 рассказов (замер на данных 06.11.2026). Число
+// зафиксировано как база: смена жанра или chars — решение владельца, а не
+// побочный эффект импорта, поэтому расхождение — ошибка, а не предупреждение.
+const bookGenres = new Set(bookCfg.genres || []);
+const bookMin = Number(bookCfg.minChars) || 1500;
+const BOOK_EXPECT = 36;
+const bookSelection = worksData.filter((w) => bookGenres.has(w.genre) && (w.chars || 0) >= bookMin);
+if (bookSelection.length !== BOOK_EXPECT) {
+  errors.push(`book: по reader.book отобрано ${bookSelection.length} текстов вместо ${BOOK_EXPECT}`);
+}
+const bookSelSlugs = new Set(bookSelection.map((w) => w.slug));
+const collapseBook = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
+const decodeBook = (s) => String(s)
+  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+  .replace(/&amp;/g, '&');
+
+// V4. Содержимое обёртки .poem[data-book-source] без потери знаков.
+// Идём по тегам и считаем баланс div — иначе оборвёмся на вложенном book-verse.
+function bookInner(html) {
+  const at = html.indexOf('class="poem" data-book-source');
+  if (at < 0) return null;
+  const openEnd = html.indexOf('>', at);
+  if (openEnd < 0) return null;
+  let depth = 1;
+  const re = /<(\/?)div\b[^>]*>/gi;
+  re.lastIndex = openEnd + 1;
+  let m;
+  while ((m = re.exec(html))) {
+    if (m[1] === '/') {
+      depth -= 1;
+      if (depth === 0) return html.slice(openEnd + 1, m.index);
+    } else {
+      depth += 1;
+    }
+  }
+  return null;
+}
+const bookPlain = (inner) => collapseBook(decodeBook(String(inner)
+  .replace(/<br\s*\/?>/gi, ' ')
+  .replace(/<[^>]+>/g, ' ')));
+
+// V3. Обёртка стоит ровно у отобранных текстов и отсутствует у остальных.
+const bookPages = new Map();
+let bookBlocks = 0;
+for (const w of worksData) {
+  const rel = `works/${w.slug}.html`;
+  const file = join(DIST, rel);
+  if (!existsSync(file)) continue; // пропажу поймает проверка ссылок
+  const html = await readFile(file, 'utf8');
+  const inner = bookInner(html);
+  if (inner == null) {
+    if (bookSelSlugs.has(w.slug)) errors.push(`${rel}: у текста книги нет обёртки .poem[data-book-source]`);
+    continue;
+  }
+  if (!bookSelSlugs.has(w.slug)) {
+    errors.push(`${rel}: обёртка data-book-source у текста вне отбора reader.book`);
+    continue;
+  }
+  bookPages.set(w.slug, html);
+  bookBlocks += (inner.match(/<p[\s>]/g) || []).length
+    + (inner.match(/class="book-verse"/g) || []).length
+    + (inner.match(/class="book-head"/g) || []).length;
+  const got = bookPlain(inner);
+  const want = collapseBook(w.text);
+  if (got !== want) {
+    let i = 0;
+    while (i < got.length && got[i] === want[i]) i += 1;
+    errors.push(`${rel}: текст книги расходится с works.json на позиции ${i}: «${got.slice(i, i + 40)}» вместо «${want.slice(i, i + 40)}»`);
+  }
+  // chars — длина текста по-сырому; строковое равенство выше держит собранные
+  // знаки, здесь — связка «chars = длине text».
+  if (w.chars !== w.text.length) {
+    errors.push(`${rel}: chars ${w.chars} при длине text ${w.text.length} в works.json`);
+  }
+}
+if (bookPages.size !== BOOK_EXPECT) errors.push(`book: страниц с обёрткой data-book-source ${bookPages.size} вместо ${BOOK_EXPECT}`);
+info.push(`book: ${bookPages.size} текстов, ${bookBlocks} абзацев`);
+
+// V3б. Структурные строки размечены, а не остались абзацами. Замеры на данных
+// 06.11.2026: «Антоновские яблоки» — I–IV и подзаголовок, «Тёмные аллеи» — I,
+// «Лёгкое дыхание» — год. Расхождение означает, что правило разбора изменилось.
+const bookTypeExpect = {
+  'антоновские-яблоки': { 'book-part': 4, 'book-head': 1 },
+  'темные-аллеи': { 'book-part': 1 },
+  'легкое-дыхание': { 'book-date': 1 },
+};
+for (const [slug, expect] of Object.entries(bookTypeExpect)) {
+  const html = bookPages.get(slug);
+  if (!html) {
+    errors.push(`book: нет страницы works/${slug}.html с обёрткой data-book-source`);
+    continue;
+  }
+  for (const [cls, want] of Object.entries(expect)) {
+    const got = (html.match(new RegExp(`class="${cls}"`, 'g')) || []).length;
+    if (got !== want) errors.push(`works/${slug}.html: блоков ${cls} ${got}, ожидалось ${want}`);
+  }
+}
+if (bookPages.has('антоновские-яблоки') && /<p>\s*(?:I|II|III|IV)\s*<\/p>/.test(bookPages.get('антоновские-яблоки'))) {
+  errors.push('works/антоновские-яблоки.html: номер части остался абзацем p');
+}
+if (bookPages.has('легкое-дыхание') && /<p>\s*19\d\d\s*<\/p>/.test(bookPages.get('легкое-дыхание'))) {
+  errors.push('works/легкое-дыхание.html: год остался абзацем p');
+}
+
+// V5. Книга грузится по клику: файлы книги на месте, вендоренный лист цел и в
+// бюджете, canvas в разметке нет, статического <script src="book.js"> нет.
+for (const f of ['book.js', 'book.css', 'stpageflip.js']) {
+  if (!existsSync(join(DIST, 'book', f))) errors.push(`dist/book/${f} отсутствует`);
+}
+const flipPath = join(DIST, 'book', 'stpageflip.js');
+if (existsSync(flipPath)) {
+  const raw = await readFile(flipPath);
+  // Заголовка MIT в самом бандле нет (он добавлен при вендоринге), поэтому
+  // проверяется начало файла.
+  const head = raw.subarray(0, 2048).toString('utf8');
+  if (!head.includes('MIT') || !head.includes('StPageFlip')) {
+    errors.push('dist/book/stpageflip.js: в первых 2 КБ нет заголовка MIT со StPageFlip');
+  }
+  if (raw.length > 51200) errors.push(`dist/book/stpageflip.js: ${raw.length} байт при бюджете 51200`);
+  else info.push(`book: StPageFlip ${raw.length} байт`);
+}
+// Суммарный бюджет книжного кода (порог серии — 64 КБ).
+const BOOK_BUDGET = 65536;
+let bookCodeBytes = 0;
+let bookCodeComplete = true;
+for (const f of ['book.js', 'book.css']) {
+  const p = join(DIST, 'book', f);
+  if (!existsSync(p)) { bookCodeComplete = false; continue; }
+  bookCodeBytes += (await stat(p)).size;
+}
+if (bookCodeComplete && bookCodeBytes > BOOK_BUDGET) {
+  errors.push(`dist/book: book.js + book.css ${bookCodeBytes} байт при бюджете ${BOOK_BUDGET}`);
+}
+// Счётчик Метрики продублирован в src/book/book.js (модулю конфиг недоступен):
+// у серии сайтов счётчики разные, поэтому расхождение — ошибка.
+const ymId = String(config.analytics?.yandexMetrika || '');
+if (ymId) {
+  const bookJs = existsSync(join(DIST, 'book', 'book.js'))
+    ? await readFile(join(DIST, 'book', 'book.js'), 'utf8') : '';
+  const inBook = /const YM_ID = '(\d+)'/.exec(bookJs);
+  if (!inBook) errors.push('dist/book/book.js: не найдена константа YM_ID');
+  else if (inBook[1] !== ymId) errors.push(`dist/book/book.js: YM_ID ${inBook[1]} не совпадает с analytics.yandexMetrika ${ymId}`);
+  else info.push('book: счётчик Метрики совпадает с конфигом');
+}
+
+// Кнопка «Режим книги» — ровно у отобранных текстов и ни у кого из коротких
+// проза-жанров (chars < reader.book.minChars).
+const bookShortSlugs = new Set(
+  worksData.filter((w) => bookGenres.has(w.genre) && (w.chars || 0) < bookMin).map((w) => w.slug),
+);
+let bookBtnPages = 0;
+for (const w of worksData) {
+  const rel = `works/${w.slug}.html`;
+  const file = join(DIST, rel);
+  if (!existsSync(file)) continue;
+  const html = await readFile(file, 'utf8');
+  const hasBtn = html.includes('data-poem-action="book"');
+  if (hasBtn) bookBtnPages += 1;
+  if (bookSelSlugs.has(w.slug) && !hasBtn) errors.push(`${rel}: у текста книги нет кнопки «Режим книги»`);
+  if (bookShortSlugs.has(w.slug) && hasBtn) errors.push(`${rel}: кнопка «Режим книги» у короткого текста (chars ${w.chars} < ${bookMin})`);
+}
+if (bookBtnPages !== BOOK_EXPECT) errors.push(`book: страниц с кнопкой «Режим книги» ${bookBtnPages} вместо ${BOOK_EXPECT}`);
+
+// V6. Текст книги обязан оставаться текстом, а скрипт — грузиться по клику.
+for (const file of htmlFiles) {
+  const html = await readFile(file, 'utf8');
+  const rel = file.replace(/\\/g, '/');
+  if (/<canvas[\s>]/i.test(html)) errors.push(`${rel}: элемент canvas в разметке`);
+  if (/<script[^>]+src="[^"]*book\.js/.test(html)) {
+    errors.push(`${rel}: book.js подключён статическим script src в HTML`);
+  }
+}
+
 // --- служебные файлы ---
 for (const f of ['404.html', 'robots.txt', 'sitemap.xml', 'search.json', '_headers', '_redirects', '.nojekyll', 'favicon.svg', 'styles.css', 'app.js']) {
   if (!existsSync(join(DIST, f))) errors.push(`dist/${f} отсутствует`);

@@ -132,11 +132,154 @@ const ruDate = (iso) => formatDate(String(iso || '').slice(0, 10));
 const stylesSource = await readFile('src/styles.css');
 const appSource = await readFile('src/app.js');
 const themeSource = await readFile('src/theme.js');
-const assetVersion = createHash('sha1')
-  .update(stylesSource).update(appSource).update(themeSource)
-  .digest('hex').slice(0, 8);
+// Версия ассетов покрывает и книжный каталог: книга грузится по отдельным
+// адресам /book/*, но берёт ?v= отсюда же — иначе правка book.js осталась бы
+// незамеченной браузером. Нет каталога src/book — сборка падает: книжный
+// режим обязан существовать (правило серии, перенос из esenin-dashboard).
+const bookAssetNames = (await readdir('src/book')).sort();
+const assetHash = createHash('sha1')
+  .update(stylesSource).update(appSource).update(themeSource);
+for (const name of bookAssetNames) assetHash.update(await readFile(join('src/book', name)));
+const assetVersion = assetHash.digest('hex').slice(0, 8);
 
 const works = await readJson('data/works.json', []);
+
+// ---------- книжный вид: отбор и разметка прозы ----------
+// Перенос из esenin-dashboard (правило серии): тот же отбор, та же разметка.
+// Охват берётся из site.config.json (reader.book), а не из кода: жанры и порог —
+// решение владельца. Переопределения типов — data/book-overrides.json.
+const bookCfg = config.reader?.book || {};
+const bookGenres = new Set(bookCfg.genres || []);
+const bookMin = Number(bookCfg.minChars) || 1500;
+const bookSlugs = new Set(works.filter((w) => bookGenres.has(w.genre) && (w.chars || 0) >= bookMin).map((w) => w.slug));
+const bookOverrides = await readJson('data/book-overrides.json', {});
+// Типы блоков книжного вида: p — абзац, verse — стихотворная цитата, part — номер части,
+// date — год, head — подзаголовок капслоком.
+const BOOK_TYPES = new Set(['p', 'verse', 'part', 'date', 'head']);
+// Порог «длинной строки» прозы: короткие строки — признак стихов.
+const BOOK_LONG_LINE = 56;
+{
+  const slugs = new Set(works.map((w) => w.slug));
+  for (const [slug, ov] of Object.entries(bookOverrides || {})) {
+    if (!slugs.has(slug)) throw new Error(`data/book-overrides.json: slug «${slug}» отсутствует в data/works.json`);
+    for (const rule of ov?.types || []) {
+      if (!BOOK_TYPES.has(rule?.type)) throw new Error(`data/book-overrides.json: ${slug} — неизвестный type «${rule?.type}»`);
+      if (!String(rule?.text ?? '').trim()) throw new Error(`data/book-overrides.json: ${slug} — пустой text в types`);
+    }
+  }
+}
+
+const bookCollapse = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
+
+// Медиана длин строк: по ней решается, разбирать блок построчно.
+function bookMedian(nums) {
+  const sorted = [...nums].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+// Структурная строка (номер части, год, подзаголовок) или null — обычный текст.
+function bookLineType(line) {
+  if (/^\d{1,4}$/.test(line)) return /^(19|20)\d\d$/.test(line) ? 'date' : 'part';
+  if (/^[IVX]+\.?$/.test(line)) return 'part';
+  if (line.length <= 40 && line === line.toUpperCase() && /\p{L}/u.test(line) && !/[.!?—]$/.test(line)) return 'head';
+  return null;
+}
+
+// Убрать \r, обрезать строки по краям, три и более переводов строки свести к двум.
+function bookNormalize(text) {
+  return String(text ?? '')
+    .replace(/\r/g, '')
+    .split('\n')
+    .map((line) => line.trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n');
+}
+
+// Разбор группы строк между переопределениями.
+function bookPushGroup(lines, lineParagraphs, out) {
+  // Блок из 2+ коротких строк — стихотворная цитата целиком.
+  if (lines.length >= 2 && lines.every((line) => line.length <= 55)) {
+    out.push({ type: 'verse', text: lines.join('\n') });
+    return;
+  }
+  // Построчный разбор, если включён переопределением или медиана длин строк ≥ 56.
+  const perLine = lineParagraphs || (lines.length >= 2 && bookMedian(lines.map((line) => line.length)) >= BOOK_LONG_LINE);
+  // Буфер обычного текста сбрасывается перед структурным блоком и в конце.
+  let buffer = [];
+  const flush = () => {
+    if (buffer.length) out.push({ type: 'p', text: buffer.join(' ') });
+    buffer = [];
+  };
+  for (const line of lines) {
+    const type = bookLineType(line);
+    if (type) {
+      flush();
+      out.push({ type, text: line });
+    } else if (perLine) {
+      flush();
+      out.push({ type: 'p', text: line });
+    } else {
+      buffer.push(line);
+    }
+  }
+  flush();
+}
+
+// Чистая функция разметки: текст произведения → блоки { type, text }.
+// Знаки текста не меняются: переводы строк внутри абзаца становятся пробелами.
+function bookParagraphs(text, override = null) {
+  const out = [];
+  const forced = new Map();
+  for (const rule of override?.types || []) forced.set(String(rule.text).trim(), rule.type);
+  const lineParagraphs = override?.lineParagraphs === true;
+  for (const block of bookNormalize(text).split(/\n{2,}/)) {
+    const lines = block.split('\n').filter((line) => line.length > 0);
+    if (!lines.length) continue;
+    let group = [];
+    const flushGroup = () => {
+      if (group.length) bookPushGroup(group, lineParagraphs, out);
+      group = [];
+    };
+    for (const line of lines) {
+      // Переопределение срабатывает до автоопределения и заменяет тип блока.
+      const type = forced.get(line);
+      if (type) {
+        flushGroup();
+        out.push({ type, text: line });
+      } else {
+        group.push(line);
+      }
+    }
+    flushGroup();
+  }
+  return out;
+}
+
+// Разметка блоков. Между тегами ни одного перевода строки и отступа —
+// у .poem включён white-space: pre-wrap, иначе на экране появятся пустые строки.
+function bookBlockHtml(block) {
+  switch (block.type) {
+    case 'part': return `<p class="book-part">${esc(block.text)}</p>`;
+    case 'date': return `<p class="book-date">${esc(block.text)}</p>`;
+    case 'head': return `<h3 class="book-head">${esc(block.text)}</h3>`;
+    case 'verse': return `<div class="book-verse">${String(block.text).split('\n').map((line) => esc(line)).join('<br>')}</div>`;
+    default: return `<p>${esc(block.text)}</p>`;
+  }
+}
+
+const bookTextHtml = (w) => `<div class="poem" data-book-source>${bookParagraphs(w.text, bookOverrides[w.slug] || null).map(bookBlockHtml).join('')}</div>`;
+
+// Сверка «сумма текста абзацев равна источнику»: сравнивается текст,
+// а не длина в байтах — переводы строк законно заменяются пробелами.
+const bookLost = [];
+let bookBlockCount = 0;
+for (const w of works) {
+  if (!bookSlugs.has(w.slug)) continue;
+  const blocks = bookParagraphs(w.text, bookOverrides[w.slug] || null);
+  bookBlockCount += blocks.length;
+  if (bookCollapse(blocks.map((b) => b.text).join(' ')) !== bookCollapse(w.text)) bookLost.push(w.slug);
+}
 const people = await readJson('data/people.json', []);
 const timeline = await readJson('data/timeline.json', []);
 const research = await readJson('data/research.json', []);
@@ -418,7 +561,7 @@ function layout({ title, description, content, active = '', bodyClass = '', json
   if (jsonLd) graph.push(...(Array.isArray(jsonLd) ? jsonLd : [jsonLd]));
 
   return `<!doctype html>
-<html lang="${esc(LANG)}" data-theme="dark">
+<html lang="${esc(LANG)}" data-theme="dark" data-v="${assetVersion}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1191,6 +1334,7 @@ function workPage(w, index) {
       <button data-poem-action="smaller" aria-label="Уменьшить шрифт">A−</button>
       <button data-poem-action="bigger" aria-label="Увеличить шрифт">A+</button>
       <button data-poem-action="reading">Режим чтения</button>
+      ${bookCfg.available === true && bookSlugs.has(w.slug) ? '<button data-poem-action="book">Режим книги</button>' : ''}
       <button data-poem-action="plain">Без оформления</button>
       <button data-poem-action="print">Распечатать</button>
       <button data-poem-action="copy">Копировать</button>
@@ -1201,7 +1345,7 @@ function workPage(w, index) {
       без правок. <button data-poem-action="print">Распечатать</button>
       <a href="/print/">Все произведения ${A.genitive} для печати →</a>
     </div>
-    <div class="poem">${esc(w.text)}</div>
+    ${bookSlugs.has(w.slug) ? bookTextHtml(w) : `<div class="poem">${esc(w.text)}</div>`}
     <p class="print-only">Иван Алексеевич Бунин. «${esc(w.title)}». Сайт о писателе: poet-bunin.ru — текст в общественном достоянии.</p>
     <div class="source-box">
       <b>Источник текста.</b> <a href="${esc(w.sourceUrl)}" rel="noopener">${esc(w.title)}</a> в Викитеке.
@@ -1902,6 +2046,12 @@ for (const p of extra.pages) {
 await writeFile(join(DIST, 'styles.css'), await readFile('src/styles.css'));
 await writeFile(join(DIST, 'app.js'), await readFile('src/app.js'));
 await writeFile(join(DIST, 'theme.js'), await readFile('src/theme.js'));
+// Книжный режим: модуль, стили и вендоренный StPageFlip копируются как есть —
+// ровно те файлы, чьи байты вошли в assetVersion (см. выше).
+await mkdir(join(DIST, 'book'), { recursive: true });
+for (const name of bookAssetNames) {
+  await writeFile(join(DIST, 'book', name), await readFile(join('src/book', name)));
+}
 await cp('public/img', join(DIST, 'img'), { recursive: true, force: true });
 
 await writeFile(join(DIST, 'favicon.svg'), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#7b2f2f"/><text x="32" y="45" font-family="Georgia,serif" font-size="38" fill="#f7f2e8" text-anchor="middle">${esc(String(A.lastName || A.name)[0])}</text></svg>`, 'utf8');
@@ -2114,18 +2264,21 @@ await writeFile(join(DIST, '_headers'), `# Заголовки для Netlify / C
   Cache-Control: public, max-age=31536000, immutable
 /theme.js
   Cache-Control: public, max-age=31536000, immutable
+/book/*
+  Cache-Control: public, max-age=31536000, immutable
 /img/*
   Cache-Control: public, max-age=31536000, immutable
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
 `, 'utf8');
 
-// Редиректы: второй домен и www ведут на основной, остальное — на 404.
+// Редиректы: www → основной домен, остальное — на 404. Хост берётся из siteUrl,
+// а не строкой: при клонировании сайта жёстко прописанный домен увёл бы
+// посетителей на чужой сайт (до 06.11.2026 здесь стояли правила esenin-сайта).
+const HOST = new URL(SITE).host;
 const redirects = [
-  '# Второй домен и www → основной (правило доменного уровня, работает на Netlify/Cloudflare Pages)',
-  'https://poet-esenin.online/*  https://poet-esenin.ru/:splat  301!',
-  'https://www.poet-esenin.online/*  https://poet-esenin.ru/:splat  301!',
-  'https://www.poet-esenin.ru/*  https://poet-esenin.ru/:splat  301!',
+  '# www → основной домен (правило доменного уровня, работает на Netlify/Cloudflare Pages)',
+  `https://www.${HOST}/*  https://${HOST}/:splat  301!`,
   '',
   '/*  /404.html  404',
   '',
@@ -2140,6 +2293,9 @@ await writeFile(join(DIST, 'CNAME'), `${new URL(SITE).host}\n`, 'utf8');
 const pageCount = uniqueUrls.length + 1;
 console.log('built pages:', pageCount);
 console.log('works:', works.length, 'people:', people.length, 'books:', books.length, 'research:', research.length);
+// Книжный режим: охват и разметка. bookLost обязан быть пустым — иначе текст
+// расходится с works.json, и это ловит verify.mjs.
+console.log('book:', bookSlugs.size, 'текстов,', bookBlockCount, 'блоков', bookLost.length ? `, ПОТЕРЯН ТЕКСТ: ${bookLost.join(', ')}` : '');
 if (/\.example\b|example\.(org|com)/.test(SITE)) console.warn('ВНИМАНИЕ: siteUrl — заглушка, укажите боевой домен в site.config.json');
 // Ссылка считается промаркированной, если она пришла из партнёрской программы готовой
 // (erid/partnerId внутри URL): тогда метка в конфиге не нужна.
