@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-08",
+  "generatedAt": "2026-11-09",
   "sections": {
     "structure": "2026-11-06",
     "works": "2026-11-01",
     "people": "2026-10-23",
     "timeline": "2026-11-02",
     "biography": "2026-11-02",
-    "publications": "2026-11-06",
+    "publications": "2026-11-08",
     "places": "2026-11-06",
     "legacy": "2026-11-06",
     "books": "2026-11-06",
@@ -30,7 +30,8 @@
     "content/publications/listopad-1900.md": "2026-11-02",
     "content/publications/posledniy-shmel-1916.md": "2026-11-03",
     "content/publications/vecher-1909.md": "2026-11-03",
-    "content/publications/sapsan-1905.md": "2026-11-04"
+    "content/publications/sapsan-1905.md": "2026-11-04",
+    "content/publications/krymskie-gory-1896.md": "2026-11-08"
   },
   "note": "Даты последнего изменения по разделам. Обновляется скриптом scripts/last-updated.mjs из истории git; в CI без истории используется этот файл."
 }

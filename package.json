@@ -15,15 +15,21 @@
     "check:affiliate": "node scripts/check-affiliate.mjs",
     "sync:prices": "node scripts/sync-prices.mjs",
     "import:audiobooks": "python scripts/import-audiobooks.py",
-    "verify": "npm run build && npm run check && npm run audit:texts && node scripts/verify.mjs",
-    "verify:strict": "npm run build && npm run check && node scripts/text-audit.mjs --strict && node scripts/verify.mjs --strict",
+    "verify": "npm run build && npm run check && npm run audit:texts && node scripts/verify.mjs && node scripts/content-coverage.mjs --gate && node scripts/links-orphans.mjs && node scripts/metrika-goals.mjs",
+    "verify:strict": "npm run build && npm run check && node scripts/text-audit.mjs --strict && node scripts/verify.mjs --strict&& node scripts/content-coverage.mjs --gate && node scripts/links-orphans.mjs && node scripts/metrika-goals.mjs",
     "serve": "node scripts/serve.mjs",
     "preview": "npm run build && npm run serve",
     "dev": "npm run build && npm run serve",
     "clean:sources": "node scripts/normalize-sources.mjs",
     "indexnow": "node scripts/indexnow.mjs",
     "audit:texts": "node scripts/text-audit.mjs",
-    "queue:status": "node scripts/queue-status.mjs"
+    "queue:status": "node scripts/queue-status.mjs",
+    "seo:audit": "node scripts/seo-audit.mjs",
+    "seo:report": "node scripts/seo-report.mjs",
+    "content:coverage": "node scripts/content-coverage.mjs",
+    "links:orphans": "node scripts/links-orphans.mjs",
+    "metrika:goals": "node scripts/metrika-goals.mjs",
+    "indexnow:dry": "node scripts/indexnow.mjs --dry-run"
   },
   "engines": {
     "node": ">=20"
