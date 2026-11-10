@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09",
+  "generatedAt": "2026-11-10",
   "sections": {
     "structure": "2026-11-09",
     "works": "2026-11-01",
@@ -36,7 +36,19 @@
     "content/publications/legkoe-dyhanie-smysl.md": "2026-11-09",
     "content/publications/sny-changa-smysl.md": "2026-11-09",
     "content/publications/sosny-bez-sobytiya.md": "2026-11-09",
-    "content/publications/tanka-pervyy-rasskaz.md": "2026-11-09"
+    "content/publications/tanka-pervyy-rasskaz.md": "2026-11-09",
+    "content/publications/svyatye-gory-1895.md": "2026-11-09",
+    "content/publications/kastryuk-1892.md": "2026-11-09",
+    "content/publications/na-kray-sveta-1894.md": "2026-11-09",
+    "content/publications/pereval-1892-razbor.md": "2026-11-09",
+    "content/publications/pri-doroge-1913.md": "2026-11-09",
+    "content/publications/ptitsy-nebesnye-1909.md": "2026-11-09",
+    "content/publications/uchitel-1894.md": "2026-11-09",
+    "content/publications/v-pole-1895.md": "2026-11-09",
+    "content/publications/bez-rodu-plemeni-1897.md": "2026-11-09",
+    "content/publications/na-khutore-1893.md": "2026-11-09",
+    "content/publications/sny-1903-razbor.md": "2026-11-09",
+    "content/publications/u-istoka-dney-1903.md": "2026-11-09"
   },
   "note": "Даты последнего изменения по разделам. Обновляется скриптом scripts/last-updated.mjs из истории git; в CI без истории используется этот файл."
 }

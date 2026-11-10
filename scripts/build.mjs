@@ -854,6 +854,17 @@ const tiles = [
   ['/about.html', '12', 'О проекте', 'Принципы, права, обновления'],
 ];
 
+// рисунок на фоне плитки: scripts/make-tile-art.py → public/img/tiles/<ключ>.svg
+const TILE_ART = {
+  '/biography/': 'biography', '/people/': 'people', '/life/': 'life', '/works/': 'library',
+  '/places/': 'places', '/legacy/': 'legacy', '/topics/': 'topics', '/books/': 'books',
+  '/research/': 'research', '/glossary.html': 'glossary', '/faq.html': 'faq', '/about.html': 'about',
+  '/legacy/gibel.html': 'gibel', '/legacy/memory.html': 'memory', '/legacy/music.html': 'music',
+  '/legacy/cinema.html': 'cinema', '/legacy/translations.html': 'translations',
+  '/life/studies.html': 'studies', '/life/passions.html': 'passions', '/life/timeline.html': 'timeline',
+};
+const tileArt = (href) => (TILE_ART[href] ? ` style="--tile-art:url('/img/tiles/${TILE_ART[href]}.svg')"` : '');
+
 const home = `
 <section class="hero">
   <div class="wrap hero-grid${A.portrait ? '' : ' no-portrait'}">
@@ -890,7 +901,7 @@ const home = `
       <div><h2>Разделы проекта</h2><p>Всё содержание собрано в связанные разделы — от биографии и людей до библиотеки и книжных изданий.</p></div>
     </div>
     <div class="tiles">
-      ${tiles.map(([href, kicker, title, count]) => `<a class="tile" href="${href}"><span class="tile-kicker">${kicker}</span><span class="tile-title">${esc(title)}</span><span class="tile-count">${esc(count)}</span></a>`).join('')}
+      ${tiles.map(([href, kicker, title, count]) => `<a class="tile" href="${href}"${tileArt(href)}><span class="tile-kicker">${kicker}</span><span class="tile-title">${esc(title)}</span><span class="tile-count">${esc(count)}</span></a>`).join('')}
     </div>
   </div>
 </section>
@@ -939,11 +950,11 @@ const home = `
       <a class="section-link" href="/legacy/">Весь раздел →</a>
     </div>
     <div class="tiles">
-      <a class="tile" href="/legacy/gibel.html"><span class="tile-kicker">01</span><span class="tile-title">Гибель писателя</span><span class="tile-count">Документы и версии</span></a>
-      <a class="tile" href="/legacy/memory.html"><span class="tile-kicker">02</span><span class="tile-title">Музеи и памятники</span><span class="tile-count">${museums.length + monuments.length} адресов</span></a>
-      <a class="tile" href="/legacy/music.html"><span class="tile-kicker">03</span><span class="tile-title">Бунин в музыке</span><span class="tile-count">Песни и романсы</span></a>
-      <a class="tile" href="/legacy/cinema.html"><span class="tile-kicker">04</span><span class="tile-title">Бунин на экране</span><span class="tile-count">Фильмы и сериалы</span></a>
-      <a class="tile" href="/legacy/translations.html"><span class="tile-kicker">05</span><span class="tile-title">Переводы</span><span class="tile-count">${(languages.languages || []).length} языков</span></a>
+      <a class="tile" href="/legacy/gibel.html" style="--tile-art:url('/img/tiles/gibel.svg')"><span class="tile-kicker">01</span><span class="tile-title">Гибель писателя</span><span class="tile-count">Документы и версии</span></a>
+      <a class="tile" href="/legacy/memory.html" style="--tile-art:url('/img/tiles/memory.svg')"><span class="tile-kicker">02</span><span class="tile-title">Музеи и памятники</span><span class="tile-count">${museums.length + monuments.length} адресов</span></a>
+      <a class="tile" href="/legacy/music.html" style="--tile-art:url('/img/tiles/music.svg')"><span class="tile-kicker">03</span><span class="tile-title">Бунин в музыке</span><span class="tile-count">Песни и романсы</span></a>
+      <a class="tile" href="/legacy/cinema.html" style="--tile-art:url('/img/tiles/cinema.svg')"><span class="tile-kicker">04</span><span class="tile-title">Бунин на экране</span><span class="tile-count">Фильмы и сериалы</span></a>
+      <a class="tile" href="/legacy/translations.html" style="--tile-art:url('/img/tiles/translations.svg')"><span class="tile-kicker">05</span><span class="tile-title">Переводы</span><span class="tile-count">${(languages.languages || []).length} языков</span></a>
     </div>
   </div>
 </section>
