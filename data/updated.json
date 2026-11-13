@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-12",
+  "generatedAt": "2026-11-13",
   "sections": {
     "structure": "2026-11-10",
     "works": "2026-11-01",
     "people": "2026-10-23",
     "timeline": "2026-11-10",
     "biography": "2026-11-02",
-    "publications": "2026-11-11",
+    "publications": "2026-11-12",
     "places": "2026-11-06",
     "legacy": "2026-11-06",
     "books": "2026-11-06",
@@ -49,7 +49,9 @@
     "content/publications/na-khutore-1893.md": "2026-11-09",
     "content/publications/sny-1903-razbor.md": "2026-11-09",
     "content/publications/u-istoka-dney-1903.md": "2026-11-09",
-    "content/publications/premiya-akademik-1909.md": "2026-11-11"
+    "content/publications/premiya-akademik-1909.md": "2026-11-11",
+    "content/publications/meliton-1900.md": "2026-11-12",
+    "content/publications/velga-1895-razbor.md": "2026-11-12"
   },
   "note": "Даты последнего изменения по разделам. Обновляется скриптом scripts/last-updated.mjs из истории git; в CI без истории используется этот файл."
 }
