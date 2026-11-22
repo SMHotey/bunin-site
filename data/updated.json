@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-21",
+  "generatedAt": "2026-11-22",
   "sections": {
     "structure": "2026-11-10",
     "works": "2026-11-01",
     "people": "2026-10-23",
     "timeline": "2026-11-10",
     "biography": "2026-11-02",
-    "publications": "2026-11-20",
+    "publications": "2026-11-21",
     "places": "2026-11-13",
     "legacy": "2026-11-06",
     "books": "2026-11-13",
@@ -57,7 +57,8 @@
     "content/publications/teffi-i-bunin.md": "2026-11-17",
     "content/publications/kanun-kupaly-1903.md": "2026-11-18",
     "content/publications/svyataya-noch-1895.md": "2026-11-19",
-    "content/publications/brak-anna-tsakni-syn.md": "2026-11-20"
+    "content/publications/brak-anna-tsakni-syn.md": "2026-11-20",
+    "content/publications/tuman-1901-razbor.md": "2026-11-21"
   },
   "note": "Даты последнего изменения по разделам. Обновляется скриптом scripts/last-updated.mjs из истории git; в CI без истории используется этот файл."
 }
