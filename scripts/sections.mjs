@@ -11,8 +11,8 @@ import { musicArt, filmArt, topicArt } from './art.mjs';
 const memoryCard = (m, body, esc) => {
   if (!m.photo) return `<div class="panel" style="margin-bottom:14px">${body}</div>`;
   const figure = `<figure class="card-photo${m.portrait ? ' card-photo--portrait' : ''}">
-    <img src="${esc(m.photo)}" alt="${esc(m.photoAlt || m.name)}" loading="lazy"${m.portrait ? '' : ' width="640" height="420"'}>
-    <figcaption>${esc(m.photoCredit || 'Фото: Wikimedia Commons')}</figcaption>
+    <picture>${m.photoWebp ? `<source srcset="${esc(m.photoWebp)}" type="image/webp">` : ''}<img src="${esc(m.photo)}" alt="${esc(m.photoAlt || m.name)}" loading="lazy"${m.portrait ? '' : ' width="640" height="420"'}></picture>
+    <figcaption>${esc(m.photoCredit || 'Фото: Wikimedia Commons')}${m.photoLicense ? ` · ${esc(m.photoLicense)}` : ''}</figcaption>
   </figure>`;
   if (m.portrait) {
     return `<div class="panel panel--portrait" style="margin-bottom:14px">${figure}<div class="panel-body">${body}</div></div>`;
@@ -199,9 +199,9 @@ export function buildSectionPages(ctx) {
     <h1 style="font-size:clamp(30px,4.6vw,44px);margin-bottom:10px">${esc(p.title)}</h1>
     <p style="font-family:var(--serif);font-size:19px;color:var(--ink-soft);max-width:64ch">${esc(p.lead)}</p>
     ${(() => {
-      const photos = p.photos || (p.photo ? [{ src: p.photo, alt: p.photoAlt, caption: p.photoCredit }] : []);
+      const photos = p.photos || (p.photo ? [{ src: p.photo, webp: p.photoWebp, alt: p.photoAlt, caption: p.photoCredit }] : []);
       if (!photos.length) return '';
-      return photos.map((ph) => `<figure class="place-photo"><img src="${esc(ph.src)}" alt="${esc(ph.alt || p.title)}" loading="lazy" width="900" height="600"><figcaption>${esc(ph.caption || 'Фото: Wikimedia Commons')}</figcaption></figure>`).join('');
+      return photos.map((ph) => `<figure class="place-photo"><picture>${ph.webp ? `<source srcset="${esc(ph.webp)}" type="image/webp">` : ''}<img src="${esc(ph.src)}" alt="${esc(ph.alt || p.title)}" loading="lazy" width="900" height="600"></picture><figcaption>${esc(ph.caption || 'Фото: Wikimedia Commons')}</figcaption></figure>`).join('');
     })()}
     <div class="panel" style="margin:20px 0 26px">
       <h3 style="font-size:18px">Коротко</h3>
