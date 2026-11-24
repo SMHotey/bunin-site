@@ -999,43 +999,6 @@
     "coverHeight": 551
   },
   {
-    "id": "est-nekiy-svet-chto-tma-ne-sokrushit-7921669",
-    "productId": "7921669",
-    "title": "Есть некий свет, что тьма не сокрушит",
-    "format": "Бумажная книга",
-    "publisher": "АСТ",
-    "isbn": "978-5-17-148725-6",
-    "pages": 320,
-    "coverType": "",
-    "productUrl": "https://www.chitai-gorod.ru/product/est-nekiy-svet-chto-tma-ne-sokrushit-7921669",
-    "stores": [
-      "chitai-gorod"
-    ],
-    "links": [
-      {
-        "store": "chitai-gorod",
-        "url": "https://www.chitai-gorod.ru/r/jGlJe?erid=2W5zFHRixV8"
-      }
-    ],
-    "category": "Стихотворения",
-    "tags": [
-      "Стихотворения",
-      "АСТ"
-    ],
-    "searchQuery": "Бунин Есть некий свет, что тьма не сокрушит",
-    "cover": "/img/books/est-nekiy-svet-chto-tma-ne-sokrushit-7921669.jpg",
-    "coverWebp": "/img/books/est-nekiy-svet-chto-tma-ne-sokrushit-7921669.webp",
-    "coverAlt": "Есть некий свет, что тьма не сокрушит — обложка издания",
-    "coverCredit": "Фото: Читай-город",
-    "price": 258,
-    "priceCurrency": "RUB",
-    "availability": "InStock",
-    "priceCheckedAt": "2026-11-13",
-    "annotation": "Стихотворения в хронологическом порядке — видно, как меняется голос. 320 с., АСТ.",
-    "coverWidth": 400,
-    "coverHeight": 615
-  },
-  {
     "id": "okaannye-dni-3097906",
     "productId": "3097906",
     "title": "Окаянные дни",
@@ -1108,43 +1071,6 @@
     "annotation": "Только стихотворения: лирика разных лет, без прозы и поэм. 480 с., АСТ.",
     "coverWidth": 400,
     "coverHeight": 629
-  },
-  {
-    "id": "v-temnote-alley-cvety-dyshali-8026878",
-    "productId": "8026878",
-    "title": "В темноте аллей цветы дышали...",
-    "format": "Бумажная книга",
-    "publisher": "Эксмо",
-    "isbn": "978-5-04-191560-5",
-    "pages": 480,
-    "coverType": "",
-    "productUrl": "https://www.chitai-gorod.ru/product/v-temnote-alley-cvety-dyshali-8026878",
-    "stores": [
-      "chitai-gorod"
-    ],
-    "links": [
-      {
-        "store": "chitai-gorod",
-        "url": "https://www.chitai-gorod.ru/r/VcTBq?erid=2W5zFHWAvLA"
-      }
-    ],
-    "category": "Стихотворения",
-    "tags": [
-      "Стихотворения",
-      "Эксмо"
-    ],
-    "searchQuery": "Бунин В темноте аллей цветы дышали...",
-    "cover": "/img/books/v-temnote-alley-cvety-dyshali-8026878.jpg",
-    "coverWebp": "/img/books/v-temnote-alley-cvety-dyshali-8026878.webp",
-    "coverAlt": "В темноте аллей цветы дышали... — обложка издания",
-    "coverCredit": "Фото: Читай-город",
-    "price": 360,
-    "priceCurrency": "RUB",
-    "availability": "InStock",
-    "priceCheckedAt": "2026-10-22",
-    "annotation": "Сборник лирики — то, что чаще всего ищут: пейзаж, деревня, любовь, поздние строки. 480 с., Эксмо.",
-    "coverWidth": 400,
-    "coverHeight": 526
   },
   {
     "id": "temnye-allei-3034441",
