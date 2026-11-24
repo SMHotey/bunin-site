@@ -7,7 +7,7 @@
     "type": "birth",
     "photo": "/img/thumbs/tl-1870-10-22-01.jpg",
     "photoAlt": "Воронеж, дом на Дворянской",
-    "photoCredit": "Фото: Елена Смольянинова, Wikimedia Commons",
+    "photoCredit": "Елена Смольянинова",
     "photoWebp": "/img/thumbs/tl-1870-10-22-01.webp"
   },
   {
@@ -28,7 +28,7 @@
     "type": "study",
     "photo": "/img/thumbs/tl-1881-03.jpg",
     "photoAlt": "Елецкая гимназия",
-    "photoCredit": "Wikimedia Commons, Public Domain",
+    "photoCredit": "Неизвестный автор",
     "photoWebp": "/img/thumbs/tl-1881-03.webp"
   },
   {
@@ -89,7 +89,7 @@
     "type": "family",
     "photo": "/img/thumbs/tl-1898-09-01-09.jpg",
     "photoAlt": "Анна Цакни",
-    "photoCredit": "Фото: неизвестный, Wikimedia Commons, Public Domain",
+    "photoCredit": "Неизвестный автор",
     "photoWebp": "/img/thumbs/tl-1898-09-01-09.webp"
   },
   {
@@ -100,7 +100,7 @@
     "type": "work",
     "photo": "/img/thumbs/tl-1899-10.jpg",
     "photoAlt": "Антон Чехов",
-    "photoCredit": "Фото: неизвестный, Wikimedia Commons",
+    "photoCredit": "Неизвестный автор",
     "photoWebp": "/img/thumbs/tl-1899-10.webp"
   },
   {
@@ -141,7 +141,7 @@
     "type": "family",
     "photo": "/img/thumbs/tl-1906-11-04-14.jpg",
     "photoAlt": "Вера Муромцева",
-    "photoCredit": "Фото: неизвестный, Wikimedia Commons, Public Domain",
+    "photoCredit": "Неизвестный автор",
     "photoWebp": "/img/thumbs/tl-1906-11-04-14.webp"
   },
   {
@@ -262,7 +262,7 @@
     "type": "death",
     "photo": "/img/thumbs/tl-1953-11-08-26.jpg",
     "photoAlt": "Кладбище в Париже",
-    "photoCredit": "Фото: Antoine Rex, Wikimedia Commons",
+    "photoCredit": "Antoine Rex",
     "photoWebp": "/img/thumbs/tl-1953-11-08-26.webp"
   }
 ]
