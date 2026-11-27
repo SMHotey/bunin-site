@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-26",
+  "generatedAt": "2026-11-27",
   "sections": {
     "structure": "2026-11-24",
     "works": "2026-11-01",
     "people": "2026-11-24",
     "timeline": "2026-11-24",
     "biography": "2026-11-02",
-    "publications": "2026-11-25",
+    "publications": "2026-11-26",
     "places": "2026-11-24",
     "legacy": "2026-11-24",
     "books": "2026-11-24",
@@ -61,7 +61,8 @@
     "content/publications/tuman-1901-razbor.md": "2026-11-21",
     "content/publications/vesti-s-rodiny-1893.md": "2026-11-23",
     "content/publications/novaya-doroga-1901-razbor.md": "2026-11-24",
-    "content/publications/na-dontse-1897-polnaia-redaktsiia.md": "2026-11-25"
+    "content/publications/na-dontse-1897-polnaia-redaktsiia.md": "2026-11-25",
+    "content/publications/veneciia-1913-razbor.md": "2026-11-26"
   },
   "note": "Даты последнего изменения по разделам. Обновляется скриптом scripts/last-updated.mjs из истории git; в CI без истории используется этот файл."
 }
